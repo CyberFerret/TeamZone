@@ -2,6 +2,7 @@ import SwiftUI
 
 struct TeamListView: View {
     @EnvironmentObject var viewModel: TeamViewModel
+    @EnvironmentObject var userSettings: UserSettings
     @State private var isAddingMember = false
 
     var body: some View {
@@ -33,6 +34,17 @@ struct TeamListView: View {
 
                 Spacer()
 
+                HStack {
+                    Text("12hr")
+                        .foregroundColor(userSettings.use24HourTime ? .secondary : .primary)
+                    Toggle("", isOn: $userSettings.use24HourTime)
+                        .toggleStyle(SwitchToggleStyle())
+                        .labelsHidden()
+                    Text("24hr")
+                        .foregroundColor(userSettings.use24HourTime ? .primary : .secondary)
+                }
+                .padding(.horizontal)
+
                 Button(action: {
                     NSApplication.shared.terminate(nil)
                 }) {
@@ -48,7 +60,7 @@ struct TeamListView: View {
             .padding(.horizontal)
             .padding(.bottom, 8)
         }
-        .frame(width: 350)
+        .frame(width: 400) // Increased width
         .padding(.vertical)
         .background(Color(NSColor.windowBackgroundColor))
         .sheet(isPresented: $isAddingMember) {

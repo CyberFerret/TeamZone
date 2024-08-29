@@ -7,6 +7,7 @@ struct TeamMemberRow: View {
     @State private var showingDeleteConfirmation = false
     @State private var isHovering = false
     @EnvironmentObject var viewModel: TeamViewModel
+    @EnvironmentObject var userSettings: UserSettings
 
     let timer = Timer.publish(every: 1, on: .main, in: .common).autoconnect()
 
@@ -36,7 +37,7 @@ struct TeamMemberRow: View {
             Text(currentTimeString)
                 .font(.system(size: 24, weight: .bold))
                 .monospacedDigit()
-                .frame(width: 70, alignment: .trailing)
+                .frame(width: 100, alignment: .trailing) // Increased width
                 .foregroundColor(.primary)
 
             // Space for Edit and Delete buttons
@@ -86,7 +87,7 @@ struct TeamMemberRow: View {
     var currentTimeString: String {
         let formatter = DateFormatter()
         formatter.timeZone = TimeZone(identifier: member.timeZone)
-        formatter.dateFormat = "HH:mm"
+        formatter.dateFormat = userSettings.use24HourTime ? "HH:mm" : "h:mm a"
         return formatter.string(from: currentTime)
     }
 }

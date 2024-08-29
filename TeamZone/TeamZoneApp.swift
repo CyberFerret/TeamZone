@@ -13,6 +13,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     var popover: NSPopover?
     let persistenceController = PersistenceController.shared
     let viewModel: TeamViewModel
+    let userSettings = UserSettings()
 
     override init() {
         self.viewModel = TeamViewModel(context: persistenceController.container.viewContext)
@@ -33,12 +34,13 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         }
 
         popover = NSPopover()
-        popover?.contentSize = NSSize(width: 350, height: 450) // Adjusted width to match TeamListView
+        popover?.contentSize = NSSize(width: 400, height: 450) // Increased width to 400
         popover?.behavior = .transient
         popover?.contentViewController = NSHostingController(
             rootView: TeamListView()
                 .environment(\.managedObjectContext, persistenceController.container.viewContext)
                 .environmentObject(viewModel)
+                .environmentObject(userSettings)
         )
     }
 
