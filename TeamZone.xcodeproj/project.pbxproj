@@ -16,6 +16,11 @@
 		072CA8F72C7F051200987A05 /* TeamZoneTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 072CA8F62C7F051200987A05 /* TeamZoneTests.swift */; };
 		072CA9012C7F051200987A05 /* TeamZoneUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 072CA9002C7F051200987A05 /* TeamZoneUITests.swift */; };
 		072CA9032C7F051200987A05 /* TeamZoneUITestsLaunchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 072CA9022C7F051200987A05 /* TeamZoneUITestsLaunchTests.swift */; };
+		072CA9142C7F08D400987A05 /* TeamListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 072CA90F2C7F08D400987A05 /* TeamListView.swift */; };
+		072CA9152C7F08D400987A05 /* AddEditMemberView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 072CA9102C7F08D400987A05 /* AddEditMemberView.swift */; };
+		072CA9162C7F08D400987A05 /* TeamMemberRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 072CA9112C7F08D400987A05 /* TeamMemberRow.swift */; };
+		072CA9172C7F08D400987A05 /* TeamViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 072CA9122C7F08D400987A05 /* TeamViewModel.swift */; };
+		072CA9182C7F08D400987A05 /* TeamMember.swift in Sources */ = {isa = PBXBuildFile; fileRef = 072CA9132C7F08D400987A05 /* TeamMember.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -49,6 +54,11 @@
 		072CA8FC2C7F051200987A05 /* TeamZoneUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = TeamZoneUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		072CA9002C7F051200987A05 /* TeamZoneUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TeamZoneUITests.swift; sourceTree = "<group>"; };
 		072CA9022C7F051200987A05 /* TeamZoneUITestsLaunchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TeamZoneUITestsLaunchTests.swift; sourceTree = "<group>"; };
+		072CA90F2C7F08D400987A05 /* TeamListView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TeamListView.swift; sourceTree = "<group>"; };
+		072CA9102C7F08D400987A05 /* AddEditMemberView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AddEditMemberView.swift; sourceTree = "<group>"; };
+		072CA9112C7F08D400987A05 /* TeamMemberRow.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TeamMemberRow.swift; sourceTree = "<group>"; };
+		072CA9122C7F08D400987A05 /* TeamViewModel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TeamViewModel.swift; sourceTree = "<group>"; };
+		072CA9132C7F08D400987A05 /* TeamMember.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TeamMember.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -99,6 +109,11 @@
 		072CA8DE2C7F051000987A05 /* TeamZone */ = {
 			isa = PBXGroup;
 			children = (
+				072CA9102C7F08D400987A05 /* AddEditMemberView.swift */,
+				072CA90F2C7F08D400987A05 /* TeamListView.swift */,
+				072CA9132C7F08D400987A05 /* TeamMember.swift */,
+				072CA9112C7F08D400987A05 /* TeamMemberRow.swift */,
+				072CA9122C7F08D400987A05 /* TeamViewModel.swift */,
 				072CA8DF2C7F051000987A05 /* TeamZoneApp.swift */,
 				072CA8E12C7F051000987A05 /* ContentView.swift */,
 				072CA8E32C7F051100987A05 /* Assets.xcassets */,
@@ -266,8 +281,13 @@
 			buildActionMask = 2147483647;
 			files = (
 				072CA8EC2C7F051100987A05 /* TeamZone.xcdatamodeld in Sources */,
+				072CA9172C7F08D400987A05 /* TeamViewModel.swift in Sources */,
+				072CA9182C7F08D400987A05 /* TeamMember.swift in Sources */,
+				072CA9162C7F08D400987A05 /* TeamMemberRow.swift in Sources */,
 				072CA8E92C7F051100987A05 /* Persistence.swift in Sources */,
+				072CA9142C7F08D400987A05 /* TeamListView.swift in Sources */,
 				072CA8E22C7F051000987A05 /* ContentView.swift in Sources */,
+				072CA9152C7F08D400987A05 /* AddEditMemberView.swift in Sources */,
 				072CA8E02C7F051000987A05 /* TeamZoneApp.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -437,6 +457,7 @@
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
+				MACOSX_DEPLOYMENT_TARGET = 12.4;
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = au.com.blaze.TeamZone;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -464,6 +485,7 @@
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
+				MACOSX_DEPLOYMENT_TARGET = 12.4;
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = au.com.blaze.TeamZone;
 				PRODUCT_NAME = "$(TARGET_NAME)";
