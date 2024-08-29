@@ -34,7 +34,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         }
 
         popover = NSPopover()
-        popover?.contentSize = NSSize(width: 400, height: 450) // Increased width to 400
+        popover?.contentSize = NSSize(width: 400, height: 450) // Adjust width as needed
         popover?.behavior = .transient
         popover?.contentViewController = NSHostingController(
             rootView: TeamListView()

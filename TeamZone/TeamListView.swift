@@ -60,7 +60,7 @@ struct TeamListView: View {
             .padding(.horizontal)
             .padding(.bottom, 8)
         }
-        .frame(width: 400) // Increased width
+        .frame(width: 400) // Adjust as needed
         .padding(.vertical)
         .background(Color(NSColor.windowBackgroundColor))
         .sheet(isPresented: $isAddingMember) {

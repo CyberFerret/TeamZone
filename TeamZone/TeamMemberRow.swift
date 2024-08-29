@@ -1,5 +1,12 @@
 import SwiftUI
 
+struct NoCaretMenuStyle: MenuStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        Menu(configuration)
+            .menuIndicator(.hidden)
+    }
+}
+
 struct TeamMemberRow: View {
     let member: TeamMember
     @State private var currentTime = Date()
@@ -12,23 +19,22 @@ struct TeamMemberRow: View {
     let timer = Timer.publish(every: 1, on: .main, in: .common).autoconnect()
 
     var body: some View {
-        HStack {
-            // Avatar and member info
-            HStack {
-                AsyncImage(url: URL(string: member.avatarURL)) { image in
-                    image.resizable()
-                } placeholder: {
-                    Image(systemName: "person.circle")
-                }
-                .frame(width: 40, height: 40)
-                .clipShape(Circle())
+        HStack(spacing: 8) {
+            // Avatar
+            AsyncImage(url: URL(string: member.avatarURL)) { image in
+                image.resizable()
+            } placeholder: {
+                Image(systemName: "person.circle")
+            }
+            .frame(width: 40, height: 40)
+            .clipShape(Circle())
 
-                VStack(alignment: .leading) {
-                    Text(member.name)
-                        .font(.headline)
-                    Text(member.location)
-                        .font(.subheadline)
-                }
+            // Member info
+            VStack(alignment: .leading) {
+                Text(member.name)
+                    .font(.headline)
+                Text(member.location)
+                    .font(.subheadline)
             }
 
             Spacer()
@@ -37,27 +43,29 @@ struct TeamMemberRow: View {
             Text(currentTimeString)
                 .font(.system(size: 24, weight: .bold))
                 .monospacedDigit()
-                .frame(width: 100, alignment: .trailing) // Increased width
+                .frame(width: 100, alignment: .trailing)
                 .foregroundColor(.primary)
 
-            // Space for Edit and Delete buttons
-            HStack(spacing: 8) {
-                Button(action: { isEditing = true }) {
-                    Image(systemName: "pencil")
+            // Ellipsis menu
+            Menu {
+                Button("Edit") {
+                    isEditing = true
                 }
-                .buttonStyle(BorderlessButtonStyle())
-                .opacity(isHovering ? 1 : 0)
-
-                Button(action: { showingDeleteConfirmation = true }) {
-                    Image(systemName: "trash")
+                Button("Delete") {
+                    showingDeleteConfirmation = true
                 }
-                .buttonStyle(BorderlessButtonStyle())
-                .foregroundColor(.red)
-                .opacity(isHovering ? 1 : 0)
+            } label: {
+                Image(systemName: "ellipsis")
+                    .foregroundColor(.primary)
+                    .frame(width: 20, height: 20)
+                    .contentShape(Rectangle())
             }
-            .frame(width: 60)
+            .menuStyle(NoCaretMenuStyle())
+            .frame(width: 20)
+            .opacity(isHovering ? 1 : 0)
         }
         .padding(.vertical, 4)
+        .padding(.horizontal, 8)
         .background(Color.clear)
         .onHover { hovering in
             withAnimation(.easeInOut(duration: 0.2)) {
