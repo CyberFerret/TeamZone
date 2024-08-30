@@ -177,6 +177,7 @@ struct AddEditMemberView: View {
                         .foregroundColor(.white)
                         .cornerRadius(4)
                 }
+                .buttonStyle(.borderless)
 
                 Spacer()
 
@@ -191,6 +192,7 @@ struct AddEditMemberView: View {
                         .foregroundColor(.white)
                         .cornerRadius(4)
                 }
+                .buttonStyle(.borderless)
             }
             .padding(.horizontal)
         }
