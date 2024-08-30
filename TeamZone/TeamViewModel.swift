@@ -3,11 +3,11 @@ import CoreData
 import SwiftUI
 
 class TeamViewModel: ObservableObject {
-    @Published var teamMembers: [TeamMember] = []
-    private var viewContext: NSManagedObjectContext
+    @Published var teamMembers: [TeamMemberEntity] = []
+    private let context: NSManagedObjectContext
 
     init(context: NSManagedObjectContext) {
-        self.viewContext = context
+        self.context = context
         fetchTeamMembers()
     }
 
@@ -16,67 +16,48 @@ class TeamViewModel: ObservableObject {
         request.sortDescriptors = [NSSortDescriptor(keyPath: \TeamMemberEntity.order, ascending: true)]
 
         do {
-            let entities = try viewContext.fetch(request)
-            teamMembers = entities.map { TeamMember.fromEntity($0) }
+            teamMembers = try context.fetch(request)
         } catch {
             print("Error fetching team members: \(error)")
         }
     }
 
-    func addTeamMember(_ member: TeamMember) {
-        let newMember = TeamMemberEntity(context: viewContext)
-        newMember.updateFromModel(member)
-        newMember.order = Int16(teamMembers.count)
-
+    func addTeamMember(_ member: TeamMemberEntity) {
+        member.order = Int16(teamMembers.count)
+        teamMembers.append(member)
         saveContext()
-        fetchTeamMembers()
     }
 
-    func updateTeamMember(_ member: TeamMember) {
-        if let entity = try? viewContext.fetch(TeamMemberEntity.fetchRequest()).first(where: { $0.id == member.id }) {
-            entity.updateFromModel(member)
+    func updateTeamMember(_ member: TeamMemberEntity) {
+        if let index = teamMembers.firstIndex(where: { $0.id == member.id }) {
+            teamMembers[index] = member
             saveContext()
-            fetchTeamMembers()
         }
     }
 
-    func deleteTeamMember(_ member: TeamMember) {
-        if let entity = try? viewContext.fetch(TeamMemberEntity.fetchRequest()).first(where: { $0.id == member.id }) {
-            viewContext.delete(entity)
+    func deleteTeamMember(_ member: TeamMemberEntity) {
+        if let index = teamMembers.firstIndex(where: { $0.id == member.id }) {
+            teamMembers.remove(at: index)
+            context.delete(member)
             saveContext()
-            fetchTeamMembers()
         }
     }
 
     func moveTeamMember(from source: IndexSet, to destination: Int) {
-        var revisedItems: [TeamMember] = teamMembers
+        teamMembers.move(fromOffsets: source, toOffset: destination)
+        updateOrder()
+    }
 
-        revisedItems.move(fromOffsets: source, toOffset: destination)
-
-        for reverseIndex in stride(from: revisedItems.count - 1, through: 0, by: -1) {
-            revisedItems[reverseIndex].order = Int16(reverseIndex)
+    func updateOrder() {
+        for (index, member) in teamMembers.enumerated() {
+            member.order = Int16(index)
         }
-
-        teamMembers = revisedItems
-
-        // Update Core Data entities
-        let request: NSFetchRequest<TeamMemberEntity> = TeamMemberEntity.fetchRequest()
-        request.sortDescriptors = [NSSortDescriptor(keyPath: \TeamMemberEntity.order, ascending: true)]
-
-        do {
-            let entities = try viewContext.fetch(request)
-            for (index, entity) in entities.enumerated() {
-                entity.order = Int16(index)
-            }
-            saveContext()
-        } catch {
-            print("Error updating team member order: \(error)")
-        }
+        saveContext()
     }
 
     private func saveContext() {
         do {
-            try viewContext.save()
+            try context.save()
         } catch {
             print("Error saving context: \(error)")
         }

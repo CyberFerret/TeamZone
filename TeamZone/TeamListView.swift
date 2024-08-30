@@ -33,9 +33,10 @@ struct TeamListView: View {
     @EnvironmentObject var viewModel: TeamViewModel
     @EnvironmentObject var userSettings: UserSettings
     @State private var isShowingAddMemberView = false
-    @State private var editingMember: TeamMember?
-    @State private var deletingMember: TeamMember?
+    @State private var editingMember: TeamMemberEntity?
+    @State private var deletingMember: TeamMemberEntity?
     @Environment(\.colorScheme) var colorScheme
+    @State private var draggedItem: TeamMemberEntity?
 
     let maxHeight: CGFloat
 
@@ -49,8 +50,12 @@ struct TeamListView: View {
                         }, onDelete: {
                             deletingMember = teamMember
                         })
+                        .onDrag {
+                            self.draggedItem = teamMember
+                            return NSItemProvider(object: teamMember.objectID.uriRepresentation() as NSURL)
+                        }
+                        .onDrop(of: [.url], delegate: DropViewDelegate(item: teamMember, items: $viewModel.teamMembers, draggedItem: $draggedItem, viewModel: viewModel))
                     }
-                    .onMove(perform: moveTeamMember)
                 }
             }
             .padding(.top, 4)
@@ -103,7 +108,7 @@ struct TeamListView: View {
         .alert(item: $deletingMember) { member in
             Alert(
                 title: Text("Delete Team Member"),
-                message: Text("Are you sure you want to delete \(member.name)?"),
+                message: Text("Are you sure you want to delete \(member.name ?? "")?"),
                 primaryButton: .destructive(Text("Delete")) {
                     viewModel.deleteTeamMember(member)
                     deletingMember = nil
@@ -121,7 +126,7 @@ struct TeamListView: View {
 }
 
 struct SwipeableTeamMemberRow: View {
-    let member: TeamMember
+    let member: TeamMemberEntity
     let onEdit: () -> Void
     let onDelete: () -> Void
 
@@ -198,5 +203,34 @@ struct SwipeableTeamMemberRow: View {
             }
         }
         .frame(height: 50) // Adjust this value to match your desired row height
+    }
+}
+
+struct DropViewDelegate: DropDelegate {
+    let item: TeamMemberEntity
+    @Binding var items: [TeamMemberEntity]
+    @Binding var draggedItem: TeamMemberEntity?
+    let viewModel: TeamViewModel
+
+    func performDrop(info: DropInfo) -> Bool {
+        viewModel.updateOrder()
+        return true
+    }
+
+    func dropEntered(info: DropInfo) {
+        guard let draggedItem = self.draggedItem else { return }
+        if draggedItem != item {
+            let from = items.firstIndex(of: draggedItem)!
+            let to = items.firstIndex(of: item)!
+            if items[to] != draggedItem {
+                withAnimation {
+                    items.move(fromOffsets: IndexSet(integer: from), toOffset: to > from ? to + 1 : to)
+                }
+            }
+        }
+    }
+
+    func dropUpdated(info: DropInfo) -> DropProposal? {
+        return DropProposal(operation: .move)
     }
 }

@@ -2,7 +2,7 @@ import SwiftUI
 
 enum AddEditMode: Equatable {
     case add
-    case edit(TeamMember)
+    case edit(TeamMemberEntity)
 
     static func == (lhs: AddEditMode, rhs: AddEditMode) -> Bool {
         switch (lhs, rhs) {
@@ -73,29 +73,27 @@ struct LocationInputView: View {
 }
 
 struct AddEditMemberView: View {
+    @Environment(\.managedObjectContext) private var viewContext
     let mode: AddEditMode
-    let onSave: (TeamMember) -> Void
-    @Environment(\.presentationMode) var presentationMode
-    @Environment(\.colorScheme) var colorScheme
+    let onSave: (TeamMemberEntity) -> Void
 
     @State private var name: String = ""
     @State private var location: String = ""
     @State private var timeZone: String = TimeZone.current.identifier
-    @State private var id: UUID = UUID()
-
-    @State private var filteredCities: [CityData] = []
-    @State private var isShowingSuggestions = false
     @State private var isEditingLocation = false
+    @State private var isShowingSuggestions = false
+    @State private var filteredCities: [CityData] = []
+    @Environment(\.presentationMode) var presentationMode
+    @Environment(\.colorScheme) var colorScheme
 
-    init(mode: AddEditMode, onSave: @escaping (TeamMember) -> Void) {
+    init(mode: AddEditMode, onSave: @escaping (TeamMemberEntity) -> Void) {
         self.mode = mode
         self.onSave = onSave
 
         if case .edit(let member) = mode {
-            _name = State(initialValue: member.name)
-            _location = State(initialValue: member.location)
-            _timeZone = State(initialValue: member.timeZone)
-            _id = State(initialValue: member.id)
+            _name = State(initialValue: member.name ?? "")
+            _location = State(initialValue: member.location ?? "")
+            _timeZone = State(initialValue: member.timeZone ?? TimeZone.current.identifier)
         }
     }
 
@@ -128,7 +126,7 @@ struct AddEditMemberView: View {
                     if isShowingSuggestions && !filteredCities.isEmpty {
                         ScrollView {
                             VStack(alignment: .leading, spacing: 5) {
-                                ForEach(filteredCities, id: \.self) { city in
+                                ForEach(filteredCities, id: \.city) { city in
                                     Text("\(city.city), \(city.country)")
                                         .padding(.vertical, 5)
                                         .padding(.horizontal, 10)
@@ -156,7 +154,18 @@ struct AddEditMemberView: View {
 
             HStack {
                 Button(action: {
-                    let member = TeamMember(id: id, name: name, location: location, timeZone: timeZone, avatarURL: "", order: 0)
+                    let member: TeamMemberEntity
+                    if case .edit(let existingMember) = mode {
+                        member = existingMember
+                    } else {
+                        member = TeamMemberEntity(context: viewContext)
+                        member.id = UUID()
+                    }
+
+                    member.name = name
+                    member.location = location
+                    member.timeZone = timeZone
+
                     onSave(member)
                     presentationMode.wrappedValue.dismiss()
                 }) {

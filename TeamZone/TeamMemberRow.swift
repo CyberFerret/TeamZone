@@ -8,7 +8,7 @@ struct NoCaretMenuStyle: MenuStyle {
 }
 
 struct TeamMemberRow: View {
-    let member: TeamMember
+    let member: TeamMemberEntity
     @State private var currentTime = Date()
     @State private var isEditing = false
     @State private var showingDeleteConfirmation = false
@@ -21,7 +21,7 @@ struct TeamMemberRow: View {
     var body: some View {
         HStack(spacing: 8) {
             // Avatar
-            AsyncImage(url: URL(string: member.avatarURL)) { image in
+            AsyncImage(url: URL(string: member.avatarURL ?? "")) { image in
                 image.resizable()
             } placeholder: {
                 Image(systemName: "person.circle")
@@ -31,9 +31,9 @@ struct TeamMemberRow: View {
 
             // Member info
             VStack(alignment: .leading) {
-                Text(member.name)
+                Text(member.name ?? "Unknown")
                     .font(.headline)
-                Text(member.location)
+                Text(member.location ?? "Unknown")
                     .font(.subheadline)
             }
 
@@ -72,7 +72,7 @@ struct TeamMemberRow: View {
         .alert(isPresented: $showingDeleteConfirmation) {
             Alert(
                 title: Text("Delete Team Member"),
-                message: Text("Are you sure you want to delete \(member.name)?"),
+                message: Text("Are you sure you want to delete \(member.name ?? "this team member")?"),
                 primaryButton: .destructive(Text("Delete")) {
                     viewModel.deleteTeamMember(member)
                 },
@@ -83,14 +83,14 @@ struct TeamMemberRow: View {
 
     var currentTimeString: String {
         let formatter = DateFormatter()
-        formatter.timeZone = TimeZone(identifier: member.timeZone)
+        formatter.timeZone = TimeZone(identifier: member.timeZone ?? "UTC")
         formatter.dateFormat = userSettings.use24HourTime ? "HH:mm" : "h:mm a"
         return formatter.string(from: currentTime)
     }
 
     var dayOfWeek: String {
         let formatter = DateFormatter()
-        formatter.timeZone = TimeZone(identifier: member.timeZone)
+        formatter.timeZone = TimeZone(identifier: member.timeZone ?? "UTC")
         formatter.dateFormat = "EEE"
         return formatter.string(from: currentTime).uppercased()
     }
