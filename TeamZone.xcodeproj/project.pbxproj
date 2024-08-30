@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		070776D02C814FC1000052DD /* SharedModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 070776CF2C814FC1000052DD /* SharedModels.swift */; };
+		070776D82C82808E000052DD /* SwipeableTeamMemberRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 070776D72C82808E000052DD /* SwipeableTeamMemberRow.swift */; };
 		072CA8E02C7F051000987A05 /* TeamZoneApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 072CA8DF2C7F051000987A05 /* TeamZoneApp.swift */; };
 		072CA8E22C7F051000987A05 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 072CA8E12C7F051000987A05 /* ContentView.swift */; };
 		072CA8E42C7F051100987A05 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 072CA8E32C7F051100987A05 /* Assets.xcassets */; };
@@ -49,6 +50,7 @@
 
 /* Begin PBXFileReference section */
 		070776CF2C814FC1000052DD /* SharedModels.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SharedModels.swift; sourceTree = "<group>"; };
+		070776D72C82808E000052DD /* SwipeableTeamMemberRow.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SwipeableTeamMemberRow.swift; sourceTree = "<group>"; };
 		072CA8DC2C7F051000987A05 /* TeamZone.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = TeamZone.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		072CA8DF2C7F051000987A05 /* TeamZoneApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TeamZoneApp.swift; sourceTree = "<group>"; };
 		072CA8E12C7F051000987A05 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
@@ -135,6 +137,7 @@
 				072CA9112C7F08D400987A05 /* TeamMemberRow.swift */,
 				072CA91F2C805B0400987A05 /* DatabaseManager.swift */,
 				072CA9122C7F08D400987A05 /* TeamViewModel.swift */,
+				070776D72C82808E000052DD /* SwipeableTeamMemberRow.swift */,
 				072CA8DF2C7F051000987A05 /* TeamZoneApp.swift */,
 				072CA8E12C7F051000987A05 /* ContentView.swift */,
 				072CA8E32C7F051100987A05 /* Assets.xcassets */,
@@ -311,6 +314,7 @@
 			files = (
 				070776D02C814FC1000052DD /* SharedModels.swift in Sources */,
 				072CA8EC2C7F051100987A05 /* TeamZone.xcdatamodeld in Sources */,
+				070776D82C82808E000052DD /* SwipeableTeamMemberRow.swift in Sources */,
 				072CA9172C7F08D400987A05 /* TeamViewModel.swift in Sources */,
 				072CA9182C7F08D400987A05 /* TeamMember.swift in Sources */,
 				072CA9162C7F08D400987A05 /* TeamMemberRow.swift in Sources */,
