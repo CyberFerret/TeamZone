@@ -83,7 +83,7 @@ struct AddEditMemberView: View {
     @State private var timeZone: String = TimeZone.current.identifier
     @State private var id: UUID = UUID()
 
-    @State private var filteredCities: [CityData] = [] // Updated to use CityData struct
+    @State private var filteredCities: [CityData] = []
     @State private var isShowingSuggestions = false
     @State private var isEditingLocation = false
 
@@ -100,7 +100,11 @@ struct AddEditMemberView: View {
     }
 
     var body: some View {
-        VStack {
+        VStack(spacing: 10) {
+            Text(mode == .add ? "Add Team Member" : "Edit Team Member")
+                .font(.headline)
+                .padding(.vertical, 16)
+
             Form {
                 TextField("Name", text: $name)
 
@@ -148,21 +152,41 @@ struct AddEditMemberView: View {
                     }
                 }
             }
-            .padding()
+            .padding([.horizontal, .bottom])
 
             HStack {
-                Button("Cancel") {
-                    presentationMode.wrappedValue.dismiss()
-                }
-                Button("Save") {
+                Button(action: {
                     let member = TeamMember(id: id, name: name, location: location, timeZone: timeZone, avatarURL: "", order: 0)
                     onSave(member)
                     presentationMode.wrappedValue.dismiss()
+                }) {
+                    Text("Save")
+                        .frame(minWidth: 60)
+                        .padding(.vertical, 2)
+                        .padding(.horizontal, 16)
+                        .background(Color.blue)
+                        .foregroundColor(.white)
+                        .cornerRadius(4)
+                }
+
+                Spacer()
+
+                Button(action: {
+                    presentationMode.wrappedValue.dismiss()
+                }) {
+                    Text("Cancel")
+                        .frame(minWidth: 60)
+                        .padding(.vertical, 2)
+                        .padding(.horizontal, 16)
+                        .background(Color.red)
+                        .foregroundColor(.white)
+                        .cornerRadius(4)
                 }
             }
-            .padding()
+            .padding(.horizontal)
         }
-        .frame(width: 300, height: 300)
+        .padding(.vertical, 10)
+        .frame(width: 300, height: 280)
         .background(Color(NSColor.windowBackgroundColor))
         .environment(\.colorScheme, colorScheme)
     }
@@ -177,3 +201,4 @@ struct AddEditMemberView: View {
         }
     }
 }
+
