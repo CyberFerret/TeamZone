@@ -16,120 +16,110 @@ enum AddEditMode: Equatable {
     }
 }
 
+struct LocationInputView: View {
+    @Binding var location: String
+    @Binding var timeZone: String
+    @State private var filteredCities: [(city: String, country: String, timezone: String)] = []
+    @State private var isShowingSuggestions = false
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 0) {
+            TextField("Location", text: $location, onEditingChanged: { isEditing in
+                isShowingSuggestions = isEditing && location.count >= 3
+                if isEditing && location.count >= 3 {
+                    updateFilteredCities()
+                }
+            })
+            .textFieldStyle(RoundedBorderTextFieldStyle())
+            .onChange(of: location) { newValue in
+                if newValue.count >= 3 {
+                    updateFilteredCities()
+                } else {
+                    filteredCities = []
+                    isShowingSuggestions = false
+                }
+            }
+
+            if isShowingSuggestions && !filteredCities.isEmpty {
+                ScrollView {
+                    LazyVStack(alignment: .leading, spacing: 0) {
+                        ForEach(filteredCities, id: \.city) { city in
+                            Text("\(city.city), \(city.country)")
+                                .padding(.vertical, 2)
+                                .padding(.horizontal, 4)
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                                .contentShape(Rectangle())
+                                .onTapGesture {
+                                    location = city.city // Store only the city name
+                                    timeZone = city.timezone
+                                    isShowingSuggestions = false
+                                }
+                        }
+                    }
+                }
+                .frame(maxHeight: 150)
+                .background(Color(.textBackgroundColor))
+                .cornerRadius(4)
+                .shadow(radius: 2)
+                .padding(.top, 2)
+            }
+        }
+    }
+
+    private func updateFilteredCities() {
+        filteredCities = DatabaseManager.shared.searchCities(query: location)
+        isShowingSuggestions = !filteredCities.isEmpty
+    }
+}
+
 struct AddEditMemberView: View {
     let mode: AddEditMode
     let onSave: (TeamMember) -> Void
     @Environment(\.presentationMode) var presentationMode
+    @Environment(\.colorScheme) var colorScheme
 
     @State private var name: String = ""
     @State private var location: String = ""
-    @State private var timeZone: String = ""
-    @State private var avatarURL: String = ""
-    @State private var filteredCities: [City] = []
+    @State private var timeZone: String = TimeZone.current.identifier
+
+    init(mode: AddEditMode, onSave: @escaping (TeamMember) -> Void) {
+        self.mode = mode
+        self.onSave = onSave
+
+        if case .edit(let member) = mode {
+            _name = State(initialValue: member.name)
+            _location = State(initialValue: member.location)
+            _timeZone = State(initialValue: member.timeZone)
+        }
+    }
 
     var body: some View {
-        VStack(spacing: 0) {
-            // Title bar
-            Text(titleText)
-                .font(.headline)
-                .padding()
-                .frame(maxWidth: .infinity)
-                .background(Color.secondary.opacity(0.2))
-
-            // Form and buttons
-            VStack {
-                Form {
-                    TextField("Name", text: $name)
-
-                    // Location field with autocomplete
-                    ZStack(alignment: .topLeading) {
-                        TextField("Location", text: $location)
-                            .onChange(of: location) { newValue in
-                                filteredCities = CityTimeZoneData.cities.filter { $0.name.lowercased().contains(newValue.lowercased()) }
-                                if let city = filteredCities.first(where: { $0.name.lowercased() == newValue.lowercased() }) {
-                                    timeZone = city.timeZone
-                                }
-                            }
-
-                        if !filteredCities.isEmpty && !location.isEmpty {
-                            List(filteredCities) { city in
-                                Text(city.name)
-                                    .onTapGesture {
-                                        location = city.name
-                                        timeZone = city.timeZone
-                                        filteredCities = []
-                                    }
-                            }
-                            .frame(maxHeight: 100)
-                            .offset(y: 20)
-                        }
+        VStack {
+            Form {
+                TextField("Name", text: $name)
+                TextField("Location", text: $location)
+                Picker("Time Zone", selection: $timeZone) {
+                    ForEach(TimeZone.knownTimeZoneIdentifiers, id: \.self) { zone in
+                        Text(zone).tag(zone)
                     }
-
-                    // Time Zone dropdown
-                    Picker("Time Zone", selection: $timeZone) {
-                        ForEach(CityTimeZoneData.allTimeZones, id: \.self) { timeZone in
-                            Text(timeZone)
-                        }
-                    }
-
-                    TextField("Avatar URL", text: $avatarURL)
                 }
-                .padding()
-
-                HStack {
-                    Button("Save") {
-                        let member = TeamMember(
-                            id: (mode == .add) ? UUID() : getMemberId(),
-                            name: name,
-                            location: location,
-                            timeZone: timeZone,
-                            avatarURL: avatarURL
-                        )
-                        onSave(member)
-                        presentationMode.wrappedValue.dismiss()
-                    }
-                    .disabled(name.isEmpty || location.isEmpty || timeZone.isEmpty)
-                    .foregroundColor(.white)
-                    .padding(.horizontal)
-                    .padding(.vertical, 8)
-                    .background(Color.blue)
-                    .cornerRadius(8)
-
-                    Spacer()
-
-                    Button("Cancel") {
-                        presentationMode.wrappedValue.dismiss()
-                    }
-                    .foregroundColor(.primary)
-                }
-                .padding()
             }
+            .padding()
+
+            HStack {
+                Button("Cancel") {
+                    presentationMode.wrappedValue.dismiss()
+                }
+                Button("Save") {
+                    let member = TeamMember(id: UUID(), name: name, location: location, timeZone: timeZone, avatarURL: "", order: 0)
+                    onSave(member)
+                    presentationMode.wrappedValue.dismiss()
+                }
+            }
+            .padding()
         }
-        .frame(width: 300, height: 350) // Increased height to accommodate the dropdown
+        .frame(width: 300, height: 200)
         .background(Color(NSColor.windowBackgroundColor))
-        .onAppear {
-            if case .edit(let member) = mode {
-                name = member.name
-                location = member.location
-                timeZone = member.timeZone
-                avatarURL = member.avatarURL
-            }
-        }
-    }
-
-    private var titleText: String {
-        switch mode {
-        case .add:
-            return "Add Team Member"
-        case .edit:
-            return "Edit Team Member"
-        }
-    }
-
-    private func getMemberId() -> UUID {
-        if case .edit(let member) = mode {
-            return member.id
-        }
-        return UUID()
+        .environment(\.colorScheme, colorScheme)
     }
 }

@@ -39,12 +39,19 @@ struct TeamMemberRow: View {
 
             Spacer()
 
-            // Time
-            Text(currentTimeString)
-                .font(.system(size: 24, weight: .bold))
-                .monospacedDigit()
-                .frame(width: 100, alignment: .trailing)
-                .foregroundColor(.primary)
+            // Day and Time
+            HStack(alignment: .lastTextBaseline, spacing: 6) {
+                Text(dayOfWeek)
+                    .font(.system(size: 12, weight: .light))
+                    .foregroundColor(.secondary)
+
+                Text(currentTimeString)
+                    .font(.system(size: 24, weight: .bold, design: .monospaced))
+                    .monospacedDigit()
+            }
+            .frame(width: 120, alignment: .trailing)
+            .lineLimit(1)
+            .minimumScaleFactor(0.5)
 
             // Ellipsis menu
             Menu {
@@ -97,5 +104,12 @@ struct TeamMemberRow: View {
         formatter.timeZone = TimeZone(identifier: member.timeZone)
         formatter.dateFormat = userSettings.use24HourTime ? "HH:mm" : "h:mm a"
         return formatter.string(from: currentTime)
+    }
+
+    var dayOfWeek: String {
+        let formatter = DateFormatter()
+        formatter.timeZone = TimeZone(identifier: member.timeZone)
+        formatter.dateFormat = "EEE"
+        return formatter.string(from: currentTime).uppercased()
     }
 }
