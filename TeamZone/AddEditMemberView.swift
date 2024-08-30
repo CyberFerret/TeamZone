@@ -19,7 +19,7 @@ enum AddEditMode: Equatable {
 struct LocationInputView: View {
     @Binding var location: String
     @Binding var timeZone: String
-    @State private var filteredCities: [(city: String, country: String, timezone: String)] = []
+    @State private var filteredCities: [CityData] = []
     @State private var isShowingSuggestions = false
 
     var body: some View {
@@ -83,6 +83,10 @@ struct AddEditMemberView: View {
     @State private var timeZone: String = TimeZone.current.identifier
     @State private var id: UUID = UUID()
 
+    @State private var filteredCities: [CityData] = [] // Updated to use CityData struct
+    @State private var isShowingSuggestions = false
+    @State private var isEditingLocation = false
+
     init(mode: AddEditMode, onSave: @escaping (TeamMember) -> Void) {
         self.mode = mode
         self.onSave = onSave
@@ -99,7 +103,45 @@ struct AddEditMemberView: View {
         VStack {
             Form {
                 TextField("Name", text: $name)
-                TextField("Location", text: $location)
+
+                VStack(alignment: .leading) {
+                    TextField("Location", text: $location, onEditingChanged: { isEditing in
+                        isEditingLocation = isEditing
+                        if isEditing {
+                            updateFilteredCities()
+                        } else {
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                                isShowingSuggestions = false
+                            }
+                        }
+                    })
+                    .onChange(of: location) { _ in
+                        if isEditingLocation {
+                            updateFilteredCities()
+                        }
+                    }
+
+                    if isShowingSuggestions && !filteredCities.isEmpty {
+                        ScrollView {
+                            VStack(alignment: .leading, spacing: 5) {
+                                ForEach(filteredCities, id: \.self) { city in
+                                    Text("\(city.city), \(city.country)")
+                                        .padding(.vertical, 5)
+                                        .padding(.horizontal, 10)
+                                        .background(Color.gray.opacity(0.2))
+                                        .cornerRadius(5)
+                                        .onTapGesture {
+                                            location = city.city
+                                            timeZone = city.timezone
+                                            isShowingSuggestions = false
+                                        }
+                                }
+                            }
+                        }
+                        .frame(maxHeight: 150)
+                    }
+                }
+
                 Picker("Time Zone", selection: $timeZone) {
                     ForEach(TimeZone.knownTimeZoneIdentifiers, id: \.self) { zone in
                         Text(zone).tag(zone)
@@ -120,8 +162,18 @@ struct AddEditMemberView: View {
             }
             .padding()
         }
-        .frame(width: 300, height: 200)
+        .frame(width: 300, height: 300)
         .background(Color(NSColor.windowBackgroundColor))
         .environment(\.colorScheme, colorScheme)
+    }
+
+    private func updateFilteredCities() {
+        if location.count >= 3 {
+            filteredCities = DatabaseManager.shared.searchCities(query: location)
+            isShowingSuggestions = !filteredCities.isEmpty
+        } else {
+            filteredCities = []
+            isShowingSuggestions = false
+        }
     }
 }

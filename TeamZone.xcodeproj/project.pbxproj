@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		070776D02C814FC1000052DD /* SharedModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 070776CF2C814FC1000052DD /* SharedModels.swift */; };
 		072CA8E02C7F051000987A05 /* TeamZoneApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 072CA8DF2C7F051000987A05 /* TeamZoneApp.swift */; };
 		072CA8E22C7F051000987A05 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 072CA8E12C7F051000987A05 /* ContentView.swift */; };
 		072CA8E42C7F051100987A05 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 072CA8E32C7F051100987A05 /* Assets.xcassets */; };
@@ -47,6 +48,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		070776CF2C814FC1000052DD /* SharedModels.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SharedModels.swift; sourceTree = "<group>"; };
 		072CA8DC2C7F051000987A05 /* TeamZone.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = TeamZone.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		072CA8DF2C7F051000987A05 /* TeamZoneApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TeamZoneApp.swift; sourceTree = "<group>"; };
 		072CA8E12C7F051000987A05 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
@@ -124,6 +126,7 @@
 			children = (
 				072CA9192C7FFE4200987A05 /* CityTimeZoneData.swift */,
 				072CA9102C7F08D400987A05 /* AddEditMemberView.swift */,
+				070776CF2C814FC1000052DD /* SharedModels.swift */,
 				072CA9282C806C6100987A05 /* TeamMemberEntity+CoreDataHelpers.swift */,
 				072CA9242C80621800987A05 /* CityTimeZoneData.db */,
 				072CA91B2C8006B800987A05 /* UserSettings.swift */,
@@ -306,6 +309,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				070776D02C814FC1000052DD /* SharedModels.swift in Sources */,
 				072CA8EC2C7F051100987A05 /* TeamZone.xcdatamodeld in Sources */,
 				072CA9172C7F08D400987A05 /* TeamViewModel.swift in Sources */,
 				072CA9182C7F08D400987A05 /* TeamMember.swift in Sources */,

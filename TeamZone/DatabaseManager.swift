@@ -1,55 +1,76 @@
 import Foundation
-import SQLite3
+import SQLite
 
 class DatabaseManager {
     static let shared = DatabaseManager()
-    private var db: OpaquePointer?
+    private var db: Connection?
 
     private init() {
         do {
-            guard let dbPath = Bundle.main.path(forResource: "CityTimeZoneData", ofType: "db") else {
-                print("Database file not found in bundle")
-                return
+            let fileManager = FileManager.default
+            let documentsPath = fileManager.urls(for: .documentDirectory, in: .userDomainMask).first!
+            let dbPath = documentsPath.appendingPathComponent("CityTimeZoneData.db").path
+
+            // Check if the database file exists in the Documents directory
+            if !fileManager.fileExists(atPath: dbPath) {
+                // If not, copy it from the app bundle
+                guard let bundleDbPath = Bundle.main.path(forResource: "CityTimeZoneData", ofType: "db") else {
+                    print("Error: Database file not found in app bundle")
+                    print("Bundle resource paths:")
+                    for path in Bundle.main.paths(forResourcesOfType: "db", inDirectory: nil) {
+                        print(path)
+                    }
+                    return
+                }
+
+                do {
+                    try fileManager.copyItem(atPath: bundleDbPath, toPath: dbPath)
+                    print("Database copied successfully to: \(dbPath)")
+                } catch {
+                    print("Error copying database file: \(error)")
+                    return
+                }
             }
 
-            print("Database path: \(dbPath)")
-
-            if sqlite3_open(dbPath, &db) != SQLITE_OK {
-                print("Error opening database")
-            } else {
-                print("Database opened successfully")
-            }
+            // Open the database connection
+            db = try Connection(dbPath)
+            print("Database opened successfully at: \(dbPath)")
         } catch {
-            print("Error setting up database: \(error)")
+            print("Error initializing database: \(error)")
         }
     }
 
-    func searchCities(query: String) -> [(city: String, country: String, timezone: String)] {
-        var results: [(city: String, country: String, timezone: String)] = []
-        let queryString = "SELECT city, country, timezone FROM cities WHERE city LIKE ? LIMIT 10"
-        var statement: OpaquePointer?
+    func searchCities(query: String) -> [CityData] {
+        guard let db = db else { return [] }
 
-        print("Searching for: \(query)")
+        let cities = Table("cities")
+        let cityColumn = Expression<String>("city")
+        let countryColumn = Expression<String>("country")
+        let timezoneColumn = Expression<String>("timezone")
 
-        if sqlite3_prepare_v2(db, queryString, -1, &statement, nil) == SQLITE_OK {
-            sqlite3_bind_text(statement, 1, "%\(query)%", -1, nil)
+        do {
+            let results = try db.prepare(cities
+                .filter(cityColumn.like("%\(query)%"))
+                .filter(cityColumn != "")
+                .filter(countryColumn != "")
+                .order(countryColumn.collate(.nocase), cityColumn.collate(.nocase))
+                .limit(50))
 
-            while sqlite3_step(statement) == SQLITE_ROW {
-                let city = String(cString: sqlite3_column_text(statement, 0))
-                let country = String(cString: sqlite3_column_text(statement, 1))
-                let timezone = String(cString: sqlite3_column_text(statement, 2))
-                results.append((city: city, country: country, timezone: timezone))
+            let cityData = results.map { row in
+                CityData(city: row[cityColumn], country: row[countryColumn], timezone: row[timezoneColumn])
             }
-        } else {
-            print("Error preparing statement: \(String(cString: sqlite3_errmsg(db)))")
+
+            let uniqueResults = Array(Set(cityData)).sorted {
+                if $0.country.lowercased() == $1.country.lowercased() {
+                    return $0.city.lowercased() < $1.city.lowercased()
+                }
+                return $0.country.lowercased() < $1.country.lowercased()
+            }
+
+            return Array(uniqueResults.prefix(10))
+        } catch {
+            print("Error searching cities: \(error)")
+            return []
         }
-
-        sqlite3_finalize(statement)
-        print("Found \(results.count) results")
-        return results
-    }
-
-    deinit {
-        sqlite3_close(db)
     }
 }
