@@ -34,19 +34,20 @@ struct TeamListView: View {
     @EnvironmentObject var userSettings: UserSettings
     @State private var isShowingAddMemberView = false
     @State private var editingMember: TeamMember?
+    @State private var deletingMember: TeamMember?
     @Environment(\.colorScheme) var colorScheme
 
     var body: some View {
         VStack {
             List {
                 ForEach(viewModel.teamMembers) { teamMember in
-                    TeamMemberRow(member: teamMember)
-                        .onTapGesture {
-                            editingMember = teamMember
-                        }
+                    SwipeableTeamMemberRow(member: teamMember, onEdit: {
+                        editingMember = teamMember
+                    }, onDelete: {
+                        deletingMember = teamMember
+                    })
                 }
                 .onMove(perform: moveTeamMember)
-                .onDelete(perform: deleteTeamMember)
             }
             .listStyle(PlainListStyle())
 
@@ -92,27 +93,94 @@ struct TeamListView: View {
             .environment(\.colorScheme, colorScheme)
             .id(member.id) // Force view recreation when editing different members
         }
+        .alert(item: $deletingMember) { member in
+            Alert(
+                title: Text("Delete Team Member"),
+                message: Text("Are you sure you want to delete \(member.name)?"),
+                primaryButton: .destructive(Text("Delete")) {
+                    viewModel.deleteTeamMember(member)
+                    deletingMember = nil
+                },
+                secondaryButton: .cancel {
+                    deletingMember = nil
+                }
+            )
+        }
     }
 
     private func moveTeamMember(from source: IndexSet, to destination: Int) {
         viewModel.moveTeamMember(from: source, to: destination)
     }
-
-    private func deleteTeamMember(at offsets: IndexSet) {
-        for index in offsets {
-            viewModel.deleteTeamMember(viewModel.teamMembers[index])
-        }
-    }
 }
 
-struct AddEditMemberViewWrapper: View {
-    let mode: AddEditMode
-    let onSave: (TeamMember) -> Void
-    let colorScheme: ColorScheme
+struct SwipeableTeamMemberRow: View {
+    let member: TeamMember
+    let onEdit: () -> Void
+    let onDelete: () -> Void
+
+    @State private var offset: CGFloat = 0
+    @State private var showingActions = false
 
     var body: some View {
-        AddEditMemberView(mode: mode, onSave: onSave)
-            .environment(\.colorScheme, colorScheme)
-            .preferredColorScheme(colorScheme)
+        ZStack {
+            HStack(spacing: 0) {
+                Spacer()
+                Button(action: {
+                    onEdit()
+                    withAnimation {
+                        offset = 0
+                        showingActions = false
+                    }
+                }) {
+                    Image(systemName: "pencil")
+                        .foregroundColor(.white)
+                        .frame(width: 60, height: 50)
+                        .background(Color.blue)
+                }
+                Button(action: {
+                    onDelete()
+                    withAnimation {
+                        offset = 0
+                        showingActions = false
+                    }
+                }) {
+                    Image(systemName: "trash")
+                        .foregroundColor(.white)
+                        .frame(width: 60, height: 50)
+                        .background(Color.red)
+                }
+            }
+
+            TeamMemberRow(member: member)
+                .background(Color(NSColor.windowBackgroundColor))
+                .offset(x: offset)
+                .gesture(
+                    DragGesture()
+                        .onChanged { value in
+                            if value.translation.width < 0 {
+                                offset = max(value.translation.width, -120)
+                            }
+                        }
+                        .onEnded { value in
+                            withAnimation {
+                                if value.translation.width < -50 {
+                                    offset = -120
+                                    showingActions = true
+                                } else {
+                                    offset = 0
+                                    showingActions = false
+                                }
+                            }
+                        }
+                )
+                .onTapGesture {
+                    if showingActions {
+                        withAnimation {
+                            offset = 0
+                            showingActions = false
+                        }
+                    }
+                }
+        }
     }
 }

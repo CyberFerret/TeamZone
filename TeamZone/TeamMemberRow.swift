@@ -52,24 +52,6 @@ struct TeamMemberRow: View {
             .frame(width: 120, alignment: .trailing)
             .lineLimit(1)
             .minimumScaleFactor(0.5)
-
-            // Ellipsis menu
-            Menu {
-                Button("Edit") {
-                    isEditing = true
-                }
-                Button("Delete") {
-                    showingDeleteConfirmation = true
-                }
-            } label: {
-                Image(systemName: "ellipsis")
-                    .foregroundColor(.primary)
-                    .frame(width: 20, height: 20)
-                    .contentShape(Rectangle())
-            }
-            .menuStyle(NoCaretMenuStyle())
-            .frame(width: 20)
-            .opacity(isHovering ? 1 : 0)
         }
         .padding(.vertical, 4)
         .padding(.horizontal, 8)
