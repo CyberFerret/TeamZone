@@ -36,4 +36,11 @@ struct PersistenceController {
             }
         }
     }
+
+    static var preview: PersistenceController = {
+        let result = PersistenceController(inMemory: true)
+        let viewContext = result.container.viewContext
+        // Add some sample data for the preview if needed
+        return result
+    }()
 }

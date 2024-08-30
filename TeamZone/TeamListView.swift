@@ -37,6 +37,8 @@ struct TeamListView: View {
     @State private var deletingMember: TeamMember?
     @Environment(\.colorScheme) var colorScheme
 
+    let maxHeight: CGFloat
+
     var body: some View {
         VStack(spacing: 0) {
             ScrollView {
@@ -51,10 +53,10 @@ struct TeamListView: View {
                     .onMove(perform: moveTeamMember)
                 }
             }
-            .padding(.top, 4) // Add a small padding to the top of the popup
-            .padding(.horizontal, 4) // Add this line to add small left and right padding
+            .padding(.top, 4)
+            .padding(.horizontal, 4)
 
-            // Bottom toolbar with custom slider toggle
+            // Bottom toolbar
             HStack {
                 Button(action: {
                     isShowingAddMemberView = true
@@ -80,8 +82,9 @@ struct TeamListView: View {
                 }
             }
             .padding(.horizontal)
-            .padding(.vertical, 8) // Reduced vertical padding in the footer
+            .padding(.vertical, 4)
         }
+        .frame(maxHeight: maxHeight)
         .sheet(isPresented: $isShowingAddMemberView) {
             AddEditMemberView(mode: .add, onSave: { newMember in
                 viewModel.addTeamMember(newMember)

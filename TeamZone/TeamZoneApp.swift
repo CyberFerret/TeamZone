@@ -106,7 +106,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             button.action = #selector(togglePopover)
         }
 
-        let rootView = ResizableView()
+        let maxHeight = min(NSScreen.main!.visibleFrame.height * 0.5, 600)
+        let rootView = ResizableView(maxHeight: maxHeight)
             .environment(\.managedObjectContext, persistenceController.container.viewContext)
             .environmentObject(viewModel)
             .environmentObject(userSettings)
@@ -158,6 +159,10 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                     let adjustedYPosition = max(screenFrame.minY, yPosition)
 
                     let newOrigin = NSPoint(x: adjustedXPosition, y: adjustedYPosition)
+
+                    let maxHeight = min(screen.frame.height * 0.5, 600)
+                    window.maxSize = NSSize(width: CGFloat.greatestFiniteMagnitude, height: maxHeight)
+
                     window.setFrameOrigin(newOrigin)
                     window.initialFrame = window.frame
 
@@ -174,9 +179,10 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
 struct ResizableView: View {
     @EnvironmentObject var userSettings: UserSettings
+    let maxHeight: CGFloat
 
     var body: some View {
-        TeamListView()
+        TeamListView(maxHeight: maxHeight)
             .frame(minHeight: 300, maxHeight: .infinity)
     }
 }
