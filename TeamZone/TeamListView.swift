@@ -38,18 +38,21 @@ struct TeamListView: View {
     @Environment(\.colorScheme) var colorScheme
 
     var body: some View {
-        VStack {
-            List {
-                ForEach(viewModel.teamMembers) { teamMember in
-                    SwipeableTeamMemberRow(member: teamMember, onEdit: {
-                        editingMember = teamMember
-                    }, onDelete: {
-                        deletingMember = teamMember
-                    })
+        VStack(spacing: 0) {
+            ScrollView {
+                LazyVStack(spacing: 0) {
+                    ForEach(viewModel.teamMembers) { teamMember in
+                        SwipeableTeamMemberRow(member: teamMember, onEdit: {
+                            editingMember = teamMember
+                        }, onDelete: {
+                            deletingMember = teamMember
+                        })
+                    }
+                    .onMove(perform: moveTeamMember)
                 }
-                .onMove(perform: moveTeamMember)
             }
-            .listStyle(PlainListStyle())
+            .padding(.top, 4) // Add a small padding to the top of the popup
+            .padding(.horizontal, 4) // Add this line to add small left and right padding
 
             // Bottom toolbar with custom slider toggle
             HStack {
@@ -76,7 +79,8 @@ struct TeamListView: View {
                     NSApplication.shared.terminate(nil)
                 }
             }
-            .padding()
+            .padding(.horizontal)
+            .padding(.vertical, 8) // Reduced vertical padding in the footer
         }
         .sheet(isPresented: $isShowingAddMemberView) {
             AddEditMemberView(mode: .add, onSave: { newMember in
