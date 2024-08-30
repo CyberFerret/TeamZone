@@ -81,6 +81,7 @@ struct AddEditMemberView: View {
     @State private var name: String = ""
     @State private var location: String = ""
     @State private var timeZone: String = TimeZone.current.identifier
+    @State private var id: UUID = UUID()
 
     init(mode: AddEditMode, onSave: @escaping (TeamMember) -> Void) {
         self.mode = mode
@@ -90,6 +91,7 @@ struct AddEditMemberView: View {
             _name = State(initialValue: member.name)
             _location = State(initialValue: member.location)
             _timeZone = State(initialValue: member.timeZone)
+            _id = State(initialValue: member.id)
         }
     }
 
@@ -111,7 +113,7 @@ struct AddEditMemberView: View {
                     presentationMode.wrappedValue.dismiss()
                 }
                 Button("Save") {
-                    let member = TeamMember(id: UUID(), name: name, location: location, timeZone: timeZone, avatarURL: "", order: 0)
+                    let member = TeamMember(id: id, name: name, location: location, timeZone: timeZone, avatarURL: "", order: 0)
                     onSave(member)
                     presentationMode.wrappedValue.dismiss()
                 }

@@ -32,8 +32,8 @@ struct CustomSliderToggle: View {
 struct TeamListView: View {
     @EnvironmentObject var viewModel: TeamViewModel
     @EnvironmentObject var userSettings: UserSettings
-    @State private var isShowingAddEditMemberView = false
-    @State private var addEditMode: AddEditMode = .add
+    @State private var isShowingAddMemberView = false
+    @State private var editingMember: TeamMember?
     @Environment(\.colorScheme) var colorScheme
 
     var body: some View {
@@ -42,8 +42,7 @@ struct TeamListView: View {
                 ForEach(viewModel.teamMembers) { teamMember in
                     TeamMemberRow(member: teamMember)
                         .onTapGesture {
-                            addEditMode = .edit(teamMember)
-                            isShowingAddEditMemberView = true
+                            editingMember = teamMember
                         }
                 }
                 .onMove(perform: moveTeamMember)
@@ -54,8 +53,7 @@ struct TeamListView: View {
             // Bottom toolbar with custom slider toggle
             HStack {
                 Button(action: {
-                    addEditMode = .add
-                    isShowingAddEditMemberView = true
+                    isShowingAddMemberView = true
                 }) {
                     Label("Add Team Member", systemImage: "plus")
                 }
@@ -79,16 +77,20 @@ struct TeamListView: View {
             }
             .padding()
         }
-        .sheet(isPresented: $isShowingAddEditMemberView) {
-            AddEditMemberView(mode: addEditMode, onSave: { updatedMember in
-                if case .add = addEditMode {
-                    viewModel.addTeamMember(updatedMember)
-                } else if case .edit = addEditMode {
-                    viewModel.updateTeamMember(updatedMember)
-                }
-                isShowingAddEditMemberView = false
+        .sheet(isPresented: $isShowingAddMemberView) {
+            AddEditMemberView(mode: .add, onSave: { newMember in
+                viewModel.addTeamMember(newMember)
+                isShowingAddMemberView = false
             })
             .environment(\.colorScheme, colorScheme)
+        }
+        .sheet(item: $editingMember) { member in
+            AddEditMemberView(mode: .edit(member), onSave: { updatedMember in
+                viewModel.updateTeamMember(updatedMember)
+                editingMember = nil
+            })
+            .environment(\.colorScheme, colorScheme)
+            .id(member.id) // Force view recreation when editing different members
         }
     }
 
@@ -106,10 +108,11 @@ struct TeamListView: View {
 struct AddEditMemberViewWrapper: View {
     let mode: AddEditMode
     let onSave: (TeamMember) -> Void
-    @Environment(\.colorScheme) var colorScheme
+    let colorScheme: ColorScheme
 
     var body: some View {
         AddEditMemberView(mode: mode, onSave: onSave)
+            .environment(\.colorScheme, colorScheme)
             .preferredColorScheme(colorScheme)
     }
 }
