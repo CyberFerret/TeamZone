@@ -42,83 +42,83 @@ struct TeamListView: View {
     let maxHeight: CGFloat
 
     var body: some View {
-        VStack(spacing: 0) {
-            // Top section (if any)
-            VStack {
-                // Add any top content here
-            }
-            .frame(height: 50) // Adjust this value as needed
+        GeometryReader { geometry in
+            VStack(spacing: 0) {
+                // Scrollable list of team members
+                ScrollView {
+                    VStack(spacing: 0) {
+                        ForEach(viewModel.teamMembers) { teamMember in
+                            HStack(spacing: 0) {
+                                if isDragModeEnabled {
+                                    Image(systemName: "line.3.horizontal")
+                                        .foregroundColor(.gray)
+                                        .frame(width: 30)
+                                        .contentShape(Rectangle())
+                                }
 
-            // Scrollable list of team members
-            ScrollView {
-                VStack(spacing: 0) {
-                    ForEach(viewModel.teamMembers) { teamMember in
-                        HStack(spacing: 0) {
-                            if isDragModeEnabled {
-                                Image(systemName: "line.3.horizontal")
-                                    .foregroundColor(.gray)
-                                    .frame(width: 30)
-                                    .contentShape(Rectangle())
+                                SwipeableTeamMemberRow(member: teamMember, onEdit: {
+                                    editingMember = teamMember
+                                }, onDelete: {
+                                    deletingMember = teamMember
+                                }, viewModel: viewModel)
+                                .disabled(isDragModeEnabled) // Disable swipe when drag mode is on
                             }
-
-                            SwipeableTeamMemberRow(member: teamMember, onEdit: {
-                                editingMember = teamMember
-                            }, onDelete: {
-                                deletingMember = teamMember
-                            }, viewModel: viewModel)
-                            .disabled(isDragModeEnabled) // Disable swipe when drag mode is on
-                        }
-                        .background(Color(NSColor.windowBackgroundColor))
-                        .if(isDragModeEnabled) { view in
-                            view.onDrag {
-                                self.draggingItem = teamMember
-                                return NSItemProvider(object: teamMember.objectID.uriRepresentation() as NSURL)
+                            .background(Color(NSColor.windowBackgroundColor))
+                            .if(isDragModeEnabled) { view in
+                                view.onDrag {
+                                    self.draggingItem = teamMember
+                                    return NSItemProvider(object: teamMember.objectID.uriRepresentation() as NSURL)
+                                }
+                                .onDrop(of: [.url], delegate: SimpleDragDelegate(item: teamMember, items: viewModel.teamMembers, draggedItem: $draggingItem) { from, to in
+                                    viewModel.moveTeamMember(from: from, to: to)
+                                })
                             }
-                            .onDrop(of: [.url], delegate: SimpleDragDelegate(item: teamMember, items: viewModel.teamMembers, draggedItem: $draggingItem) { from, to in
-                                viewModel.moveTeamMember(from: from, to: to)
-                            })
                         }
                     }
+                    .padding(.top, 8)
                 }
-            }
+                .padding(.horizontal, 8)
+                .frame(height: max(geometry.size.height - 50, 200)) // Ensure minimum content height
 
-            // Bottom toolbar
-            VStack {
-                HStack {
-                    Button(action: {
-                        isShowingAddMemberView = true
-                    }) {
-                        Label("Add Team Member", systemImage: "plus")
-                    }
-
-                    Spacer()
-
-                    Button(action: {
-                        isDragModeEnabled.toggle()
-                    }) {
-                        Image(systemName: isDragModeEnabled ? "arrow.up.arrow.down.circle.fill" : "arrow.up.arrow.down.circle")
-                    }
-                    .help(isDragModeEnabled ? "Exit Rearrange Mode" : "Enter Rearrange Mode")
-
+                // Bottom toolbar
+                VStack {
                     HStack {
-                        Text("12hr")
-                            .foregroundColor(userSettings.use24HourTime ? Color.gray.opacity(0.5) : Color.gray.opacity(0.8))
-                        CustomSliderToggle(isOn: $userSettings.use24HourTime)
-                        Text("24hr")
-                            .foregroundColor(userSettings.use24HourTime ? Color.gray.opacity(0.8) : Color.gray.opacity(0.5))
-                    }
-                    .font(.footnote)
+                        Button(action: {
+                            isShowingAddMemberView = true
+                        }) {
+                            Label("Add Team Member", systemImage: "plus")
+                        }
 
-                    Spacer()
+                        Spacer()
 
-                    Button("Quit") {
-                        NSApplication.shared.terminate(nil)
+                        Button(action: {
+                            isDragModeEnabled.toggle()
+                        }) {
+                            Image(systemName: isDragModeEnabled ? "arrow.up.arrow.down.circle.fill" : "arrow.up.arrow.down.circle")
+                        }
+                        .help(isDragModeEnabled ? "Exit Rearrange Mode" : "Enter Rearrange Mode")
+
+                        HStack {
+                            Text("12hr")
+                                .foregroundColor(userSettings.use24HourTime ? Color.gray.opacity(0.5) : Color.gray.opacity(0.8))
+                            CustomSliderToggle(isOn: $userSettings.use24HourTime)
+                            Text("24hr")
+                                .foregroundColor(userSettings.use24HourTime ? Color.gray.opacity(0.8) : Color.gray.opacity(0.5))
+                        }
+                        .font(.footnote)
+
+                        Spacer()
+
+                        Button("Quit") {
+                            NSApplication.shared.terminate(nil)
+                        }
                     }
+                    .padding(.horizontal)
+                    .padding(.vertical, 4)
                 }
-                .padding(.horizontal)
-                .padding(.vertical, 4)
+                .frame(height: 50)
+                .background(Color(NSColor.windowBackgroundColor)) // Add background to toolbar
             }
-            .frame(height: 50) // Adjust this value as needed
         }
         .frame(maxHeight: maxHeight)
         .sheet(isPresented: $isShowingAddMemberView) {
