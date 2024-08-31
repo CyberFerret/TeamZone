@@ -88,6 +88,7 @@ struct AddEditMemberView: View {
     @Environment(\.colorScheme) var colorScheme
     @State private var avatarImage: NSImage?
     @State private var isShowingImagePicker = false
+    @State private var existingAvatarData: Data?
 
     init(mode: AddEditMode, onSave: @escaping (TeamMemberEntity) -> Void) {
         self.mode = mode
@@ -97,6 +98,7 @@ struct AddEditMemberView: View {
             _name = State(initialValue: member.name ?? "")
             _location = State(initialValue: member.location ?? "")
             _timeZone = State(initialValue: member.timeZone ?? TimeZone.current.identifier)
+            _existingAvatarData = State(initialValue: member.avatarData)
         }
     }
 
@@ -155,8 +157,14 @@ struct AddEditMemberView: View {
                     }
 
                     Section(header: Text("Avatar")) {
-                        if let avatar = avatarImage {
-                            Image(nsImage: avatar)
+                        if let avatarImage = avatarImage {
+                            Image(nsImage: avatarImage)
+                                .resizable()
+                                .scaledToFit()
+                                .frame(width: 100, height: 100)
+                                .clipShape(Circle())
+                        } else if let existingData = existingAvatarData, let existingImage = NSImage(data: existingData) {
+                            Image(nsImage: existingImage)
                                 .resizable()
                                 .scaledToFit()
                                 .frame(width: 100, height: 100)
@@ -164,12 +172,13 @@ struct AddEditMemberView: View {
                         }
 
                         Button(action: selectAvatar) {
-                            Text(avatarImage == nil ? "Add Avatar" : "Change Avatar")
+                            Text(avatarImage == nil && existingAvatarData == nil ? "Add Avatar" : "Change Avatar")
                         }
 
-                        if avatarImage != nil {
+                        if avatarImage != nil || existingAvatarData != nil {
                             Button("Remove Avatar") {
                                 avatarImage = nil
+                                existingAvatarData = nil
                             }
                         }
                     }
@@ -227,9 +236,8 @@ struct AddEditMemberView: View {
                         member.timeZone = timeZone
 
                         if let avatar = avatarImage {
-                            let resizedAvatar = avatar.resized(to: NSSize(width: 100, height: 100))
-                            member.avatarData = resizedAvatar.tiffRepresentation
-                        } else {
+                            member.avatarData = avatar.tiffRepresentation
+                        } else if existingAvatarData == nil {
                             member.avatarData = nil
                         }
 
