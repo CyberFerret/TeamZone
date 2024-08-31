@@ -215,13 +215,10 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     @objc func togglePopover() {
-        print("Toggle popover called")
         if let button = statusItem?.button {
             if popoverWindow?.isVisible == true {
-                print("Closing popover")
                 popoverWindow?.close()
             } else {
-                print("Showing popover")
                 if let window = popoverWindow, let screen = NSScreen.main {
                     button.highlight(true)
 
@@ -253,8 +250,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                 }
                 button.highlight(false)
             }
-        } else {
-            print("Status item button not found")
         }
     }
 }
