@@ -45,13 +45,12 @@ class TeamViewModel: ObservableObject {
 
     func moveTeamMember(from source: IndexSet, to destination: Int) {
         teamMembers.move(fromOffsets: source, toOffset: destination)
-        updateOrder()
-    }
 
-    func updateOrder() {
+        // Update the order of team members
         for (index, member) in teamMembers.enumerated() {
             member.order = Int16(index)
         }
+
         saveContext()
     }
 

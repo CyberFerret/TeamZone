@@ -36,58 +36,89 @@ struct TeamListView: View {
     @State private var editingMember: TeamMemberEntity?
     @State private var deletingMember: TeamMemberEntity?
     @Environment(\.colorScheme) var colorScheme
-    @State private var draggedItem: TeamMemberEntity?
+    @State private var isDragModeEnabled = false
+    @State private var draggingItem: TeamMemberEntity?
 
     let maxHeight: CGFloat
 
     var body: some View {
         VStack(spacing: 0) {
+            // Top section (if any)
+            VStack {
+                // Add any top content here
+            }
+            .frame(height: 50) // Adjust this value as needed
+
+            // Scrollable list of team members
             ScrollView {
-                LazyVStack(spacing: 0) {
+                VStack(spacing: 0) {
                     ForEach(viewModel.teamMembers) { teamMember in
-                        SwipeableTeamMemberRow(member: teamMember, onEdit: {
-                            editingMember = teamMember
-                        }, onDelete: {
-                            deletingMember = teamMember
-                        }, viewModel: viewModel)  // We've added viewModel here
-                        .onDrag {
-                            self.draggedItem = teamMember
-                            return NSItemProvider(object: teamMember.objectID.uriRepresentation() as NSURL)
+                        HStack(spacing: 0) {
+                            if isDragModeEnabled {
+                                Image(systemName: "line.3.horizontal")
+                                    .foregroundColor(.gray)
+                                    .frame(width: 30)
+                                    .contentShape(Rectangle())
+                            }
+
+                            SwipeableTeamMemberRow(member: teamMember, onEdit: {
+                                editingMember = teamMember
+                            }, onDelete: {
+                                deletingMember = teamMember
+                            }, viewModel: viewModel)
+                            .disabled(isDragModeEnabled) // Disable swipe when drag mode is on
                         }
-                        .onDrop(of: [.url], delegate: DropViewDelegate(item: teamMember, items: $viewModel.teamMembers, draggedItem: $draggedItem, viewModel: viewModel))
+                        .background(Color(NSColor.windowBackgroundColor))
+                        .if(isDragModeEnabled) { view in
+                            view.onDrag {
+                                self.draggingItem = teamMember
+                                return NSItemProvider(object: teamMember.objectID.uriRepresentation() as NSURL)
+                            }
+                            .onDrop(of: [.url], delegate: SimpleDragDelegate(item: teamMember, items: viewModel.teamMembers, draggedItem: $draggingItem) { from, to in
+                                viewModel.moveTeamMember(from: from, to: to)
+                            })
+                        }
                     }
                 }
             }
-            .padding(.top, 4)
-            .padding(.horizontal, 4)
 
             // Bottom toolbar
-            HStack {
-                Button(action: {
-                    isShowingAddMemberView = true
-                }) {
-                    Label("Add", systemImage: "plus")
-                }
-
-                Spacer()
-
+            VStack {
                 HStack {
-                    Text("12hr")
-                        .foregroundColor(userSettings.use24HourTime ? Color.gray.opacity(0.5) : Color.gray.opacity(0.8))
-                    CustomSliderToggle(isOn: $userSettings.use24HourTime)
-                    Text("24hr")
-                        .foregroundColor(userSettings.use24HourTime ? Color.gray.opacity(0.8) : Color.gray.opacity(0.5))
-                }
-                .font(.footnote)
+                    Button(action: {
+                        isShowingAddMemberView = true
+                    }) {
+                        Label("Add Team Member", systemImage: "plus")
+                    }
 
-                Spacer()
+                    Spacer()
 
-                Button("Quit") {
-                    NSApplication.shared.terminate(nil)
+                    Button(action: {
+                        isDragModeEnabled.toggle()
+                    }) {
+                        Image(systemName: isDragModeEnabled ? "arrow.up.arrow.down.circle.fill" : "arrow.up.arrow.down.circle")
+                    }
+                    .help(isDragModeEnabled ? "Exit Rearrange Mode" : "Enter Rearrange Mode")
+
+                    HStack {
+                        Text("12hr")
+                            .foregroundColor(userSettings.use24HourTime ? Color.gray.opacity(0.5) : Color.gray.opacity(0.8))
+                        CustomSliderToggle(isOn: $userSettings.use24HourTime)
+                        Text("24hr")
+                            .foregroundColor(userSettings.use24HourTime ? Color.gray.opacity(0.8) : Color.gray.opacity(0.5))
+                    }
+                    .font(.footnote)
+
+                    Spacer()
+
+                    Button("Quit") {
+                        NSApplication.shared.terminate(nil)
+                    }
                 }
+                .padding(.horizontal)
+                .padding(.vertical, 4)
             }
-            .padding(.horizontal)
-            .padding(.vertical, 8)
+            .frame(height: 50) // Adjust this value as needed
         }
         .frame(maxHeight: maxHeight)
         .sheet(isPresented: $isShowingAddMemberView) {
@@ -125,32 +156,53 @@ struct TeamListView: View {
     }
 }
 
-
-struct DropViewDelegate: DropDelegate {
+struct SimpleDragDelegate: DropDelegate {
     let item: TeamMemberEntity
-    @Binding var items: [TeamMemberEntity]
+    let items: [TeamMemberEntity]
     @Binding var draggedItem: TeamMemberEntity?
-    let viewModel: TeamViewModel
+    let moveAction: (IndexSet, Int) -> Void
 
     func performDrop(info: DropInfo) -> Bool {
-        viewModel.updateOrder()
+        guard let draggedItem = self.draggedItem,
+              let fromIndex = items.firstIndex(of: draggedItem),
+              let toIndex = items.firstIndex(of: item) else {
+            return false
+        }
+
+        if fromIndex != toIndex {
+            moveAction(IndexSet(integer: fromIndex), toIndex)
+        }
+
         return true
     }
 
     func dropEntered(info: DropInfo) {
-        guard let draggedItem = self.draggedItem else { return }
-        if draggedItem != item {
-            let from = items.firstIndex(of: draggedItem)!
-            let to = items.firstIndex(of: item)!
-            if items[to] != draggedItem {
-                withAnimation {
-                    items.move(fromOffsets: IndexSet(integer: from), toOffset: to > from ? to + 1 : to)
-                }
-            }
+        guard let draggedItem = self.draggedItem,
+              let fromIndex = items.firstIndex(of: draggedItem),
+              let toIndex = items.firstIndex(of: item) else {
+            return
+        }
+
+        if fromIndex != toIndex {
+            moveAction(IndexSet(integer: fromIndex), toIndex)
         }
     }
 
     func dropUpdated(info: DropInfo) -> DropProposal? {
         return DropProposal(operation: .move)
+    }
+
+    func validateDrop(info: DropInfo) -> Bool {
+        return true
+    }
+}
+
+extension View {
+    @ViewBuilder func `if`<Content: View>(_ condition: Bool, transform: (Self) -> Content) -> some View {
+        if condition {
+            transform(self)
+        } else {
+            self
+        }
     }
 }

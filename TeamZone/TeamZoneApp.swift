@@ -14,6 +14,20 @@ class ResizableWindow: NSWindow {
 
     var initialFrame: NSRect?
 
+    override init(contentRect: NSRect, styleMask style: NSWindow.StyleMask, backing backingStoreType: NSWindow.BackingStoreType, defer flag: Bool) {
+        super.init(contentRect: contentRect, styleMask: [.borderless, .fullSizeContentView], backing: backingStoreType, defer: flag)
+
+        // Disable standard resize behavior
+        self.styleMask.remove(.resizable)
+
+        // Set the window to be non-movable
+        self.isMovable = false
+
+        // Set a fixed width
+        self.minSize = NSSize(width: 400, height: 300)
+        self.maxSize = NSSize(width: 400, height: NSScreen.main!.visibleFrame.height / 2)
+    }
+
     override func constrainFrameRect(_ frameRect: NSRect, to screen: NSScreen?) -> NSRect {
         guard let initialFrame = initialFrame else {
             self.initialFrame = frameRect
@@ -22,13 +36,15 @@ class ResizableWindow: NSWindow {
 
         var newFrame = frameRect
         newFrame.origin.x = initialFrame.origin.x
-        newFrame.origin.y = initialFrame.origin.y
         newFrame.size.width = initialFrame.size.width
 
         // Constrain the height between minSize and maxSize
         let minHeight: CGFloat = 300
         let maxHeight = NSScreen.main!.visibleFrame.height / 2
         newFrame.size.height = max(minHeight, min(newFrame.size.height, maxHeight))
+
+        // Ensure the top of the window stays in place
+        newFrame.origin.y = initialFrame.maxY - newFrame.size.height
 
         return newFrame
     }
@@ -41,6 +57,9 @@ class ResizableWindow: NSWindow {
 class ResizablePopoverViewController: NSViewController {
     var hostingController: NSHostingController<AnyView>?
     var userSettings: UserSettings
+    private var resizeHandle: NSView!
+    private var lastHeight: CGFloat = 0
+    private var isResizing = false
 
     init(rootView: AnyView, userSettings: UserSettings) {
         self.userSettings = userSettings
@@ -64,6 +83,25 @@ class ResizablePopoverViewController: NSViewController {
                 hostView.bottomAnchor.constraint(equalTo: self.view.bottomAnchor)
             ])
         }
+
+        // Add a resize handle to the bottom of the view
+        resizeHandle = NSView()
+        resizeHandle.wantsLayer = true
+        resizeHandle.layer?.backgroundColor = NSColor.clear.cgColor
+
+        self.view.addSubview(resizeHandle)
+        resizeHandle.translatesAutoresizingMaskIntoConstraints = false
+        NSLayoutConstraint.activate([
+            resizeHandle.leadingAnchor.constraint(equalTo: self.view.leadingAnchor),
+            resizeHandle.trailingAnchor.constraint(equalTo: self.view.trailingAnchor),
+            resizeHandle.bottomAnchor.constraint(equalTo: self.view.bottomAnchor),
+            resizeHandle.heightAnchor.constraint(equalToConstant: 10)
+        ])
+
+        let resizeHandleTrackingArea = NSTrackingArea(rect: .zero, options: [.mouseEnteredAndExited, .activeAlways, .inVisibleRect], owner: self, userInfo: nil)
+        resizeHandle.addTrackingArea(resizeHandleTrackingArea)
+
+        resizeHandle.addGestureRecognizer(NSPanGestureRecognizer(target: self, action: #selector(handleResize(_:))))
     }
 
     override func viewDidLoad() {
@@ -72,6 +110,48 @@ class ResizablePopoverViewController: NSViewController {
             window.minSize = NSSize(width: 400, height: 300)
             window.maxSize = NSSize(width: 400, height: NSScreen.main!.visibleFrame.height / 2)
             window.setContentSize(NSSize(width: 400, height: userSettings.windowHeight))
+            lastHeight = userSettings.windowHeight
+        }
+    }
+
+    override func mouseEntered(with event: NSEvent) {
+        if event.trackingArea?.owner as? NSView == resizeHandle {
+            NSCursor.resizeUpDown.set()
+        }
+    }
+
+    override func mouseExited(with event: NSEvent) {
+        if event.trackingArea?.owner as? NSView == resizeHandle {
+            NSCursor.arrow.set()
+        }
+    }
+
+    @objc func handleResize(_ gestureRecognizer: NSPanGestureRecognizer) {
+        guard let window = self.view.window as? ResizableWindow else { return }
+
+        switch gestureRecognizer.state {
+        case .began:
+            isResizing = true
+        case .changed:
+            let translation = gestureRecognizer.translation(in: self.view)
+            var newFrame = window.frame
+            newFrame.size.height -= translation.y
+
+            // Constrain the height between minSize and maxSize
+            let minHeight: CGFloat = 300
+            let maxHeight = NSScreen.main!.visibleFrame.height / 2
+            newFrame.size.height = max(minHeight, min(newFrame.size.height, maxHeight))
+
+            // Adjust the origin to keep the top of the window in place
+            newFrame.origin.y = window.frame.maxY - newFrame.size.height
+
+            window.setFrame(newFrame, display: true, animate: false)
+            gestureRecognizer.setTranslation(.zero, in: self.view)
+        case .ended:
+            isResizing = false
+            userSettings.windowHeight = window.frame.height
+        default:
+            break
         }
     }
 }
@@ -120,7 +200,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
         popoverWindow = ResizableWindow(
             contentRect: NSRect(x: 0, y: 0, width: 400, height: initialHeight),
-            styleMask: [.borderless, .resizable, .fullSizeContentView],
+            styleMask: [.borderless, .fullSizeContentView],
             backing: .buffered,
             defer: false
         )
