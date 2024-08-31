@@ -21,13 +21,19 @@ struct TeamMemberRow: View {
     var body: some View {
         HStack(spacing: 8) {
             // Avatar
-            AsyncImage(url: URL(string: member.avatarURL ?? "")) { image in
-                image.resizable()
-            } placeholder: {
+            if let avatarData = member.avatarData, let nsImage = NSImage(data: avatarData) {
+                Image(nsImage: nsImage)
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 40, height: 40)
+                    .clipShape(Circle())
+            } else {
                 Image(systemName: "person.circle")
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 40, height: 40)
+                    .foregroundColor(.gray)
             }
-            .frame(width: 40, height: 40)
-            .clipShape(Circle())
 
             // Member info
             VStack(alignment: .leading) {

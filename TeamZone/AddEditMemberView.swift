@@ -1,4 +1,5 @@
 import SwiftUI
+import AppKit
 
 enum AddEditMode: Equatable {
     case add
@@ -85,6 +86,8 @@ struct AddEditMemberView: View {
     @State private var filteredCities: [CityData] = []
     @Environment(\.presentationMode) var presentationMode
     @Environment(\.colorScheme) var colorScheme
+    @State private var avatarImage: NSImage?
+    @State private var isShowingImagePicker = false
 
     init(mode: AddEditMode, onSave: @escaping (TeamMemberEntity) -> Void) {
         self.mode = mode
@@ -149,6 +152,62 @@ struct AddEditMemberView: View {
                         Text(zone).tag(zone)
                     }
                 }
+
+                Section(header: Text("Avatar")) {
+                    if let avatar = avatarImage {
+                        Image(nsImage: avatar)
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 100, height: 100)
+                            .clipShape(Circle())
+                    }
+
+                    Button(action: selectAvatar) {
+                        Text(avatarImage == nil ? "Add Avatar" : "Change Avatar")
+                    }
+
+                    if avatarImage != nil {
+                        Button("Remove Avatar") {
+                            avatarImage = nil
+                        }
+                    }
+                }
+
+                TextField("Location", text: $location, onEditingChanged: { isEditing in
+                    isEditingLocation = isEditing
+                    if isEditing {
+                        updateFilteredCities()
+                    } else {
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                            isShowingSuggestions = false
+                        }
+                    }
+                })
+                .onChange(of: location) { _ in
+                    if isEditingLocation {
+                        updateFilteredCities()
+                    }
+                }
+
+                if isShowingSuggestions && !filteredCities.isEmpty {
+                    ScrollView {
+                        VStack(alignment: .leading, spacing: 5) {
+                            ForEach(filteredCities, id: \.city) { city in
+                                Text("\(city.city), \(city.country)")
+                                    .padding(.vertical, 5)
+                                    .padding(.horizontal, 10)
+                                    .background(Color.gray.opacity(0.2))
+                                    .cornerRadius(5)
+                                    .onTapGesture {
+                                        location = city.city
+                                        timeZone = city.timezone
+                                        isShowingSuggestions = false
+                                    }
+                            }
+                        }
+                    }
+                    .frame(maxHeight: 150)
+                }
             }
             .padding([.horizontal, .bottom])
 
@@ -165,6 +224,13 @@ struct AddEditMemberView: View {
                     member.name = name
                     member.location = location
                     member.timeZone = timeZone
+
+                    if let avatar = avatarImage {
+                        let resizedAvatar = avatar.resized(to: NSSize(width: 100, height: 100))
+                        member.avatarData = resizedAvatar.tiffRepresentation
+                    } else {
+                        member.avatarData = nil
+                    }
 
                     onSave(member)
                     presentationMode.wrappedValue.dismiss()
@@ -209,6 +275,22 @@ struct AddEditMemberView: View {
         } else {
             filteredCities = []
             isShowingSuggestions = false
+        }
+    }
+
+    private func selectAvatar() {
+        let openPanel = NSOpenPanel()
+        openPanel.allowedContentTypes = [.image]
+        openPanel.allowsMultipleSelection = false
+        openPanel.canChooseDirectories = false
+        openPanel.canChooseFiles = true
+
+        openPanel.begin { response in
+            if response == .OK, let url = openPanel.url {
+                if let image = NSImage(contentsOf: url) {
+                    self.avatarImage = image.resized(to: NSSize(width: 100, height: 100))
+                }
+            }
         }
     }
 }
