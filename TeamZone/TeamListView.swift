@@ -95,10 +95,11 @@ struct TeamListView: View {
                         Button(action: {
                             isShowingAddMemberView = true
                         }) {
-                            Label("Add Team Member", systemImage: "plus")
+                            Image(systemName: "plus")
                         }
+                        .help("Add Team Member")
 
-                        Spacer()
+                        Spacer(minLength: 30) // Minimum space of 30 points
 
                         Button(action: {
                             isDragModeEnabled.toggle()
@@ -107,6 +108,8 @@ struct TeamListView: View {
                         }
                         .buttonStyle(PlainButtonStyle())
                         .help(isDragModeEnabled ? "Exit Rearrange Mode" : "Enter Rearrange Mode")
+
+                        Spacer(minLength: 20) // Minimum space of 20 points
 
                         HStack {
                             Text("12hr")
@@ -117,7 +120,7 @@ struct TeamListView: View {
                         }
                         .font(.footnote)
 
-                        Spacer()
+                        Spacer(minLength: 30) // Minimum space of 30 points
 
                         Button("Quit") {
                             NSApplication.shared.terminate(nil)
