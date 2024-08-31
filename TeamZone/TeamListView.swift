@@ -55,32 +55,46 @@ struct TeamListView: View {
 
                 // Scrollable list of team members
                 ScrollView {
-                    VStack(spacing: 0) {
-                        ForEach(viewModel.teamMembers) { teamMember in
-                            HStack(spacing: 0) {
-                                if isDragModeEnabled {
-                                    Image(systemName: "line.3.horizontal")
-                                        .foregroundColor(.gray)
-                                        .frame(width: 30)
-                                        .contentShape(Rectangle())
-                                }
+                    if viewModel.teamMembers.isEmpty {
+                        VStack {
+                            Spacer()
+                            Text("No team members yet")
+                                .font(.headline)
+                                .foregroundColor(.secondary)
+                            Text("Click the '+' button below to add team members")
+                                .font(.subheadline)
+                                .foregroundColor(.secondary)
+                            Spacer()
+                        }
+                        .frame(height: geometry.size.height - 100) // Adjust for toolbar height
+                    } else {
+                        VStack(spacing: 0) {
+                            ForEach(viewModel.teamMembers) { teamMember in
+                                HStack(spacing: 0) {
+                                    if isDragModeEnabled {
+                                        Image(systemName: "line.3.horizontal")
+                                            .foregroundColor(.gray)
+                                            .frame(width: 30)
+                                            .contentShape(Rectangle())
+                                    }
 
-                                SwipeableTeamMemberRow(member: teamMember, onEdit: {
-                                    editingMember = teamMember
-                                }, onDelete: {
-                                    deletingMember = teamMember
-                                }, viewModel: viewModel)
-                                .disabled(isDragModeEnabled) // Disable swipe when drag mode is on
-                            }
-                            .background(Color(NSColor.windowBackgroundColor))
-                            .if(isDragModeEnabled) { view in
-                                view.onDrag {
-                                    self.draggingItem = teamMember
-                                    return NSItemProvider(object: teamMember.objectID.uriRepresentation() as NSURL)
+                                    SwipeableTeamMemberRow(member: teamMember, onEdit: {
+                                        editingMember = teamMember
+                                    }, onDelete: {
+                                        deletingMember = teamMember
+                                    }, viewModel: viewModel)
+                                    .disabled(isDragModeEnabled) // Disable swipe when drag mode is on
                                 }
-                                .onDrop(of: [.url], delegate: SimpleDragDelegate(item: teamMember, items: viewModel.teamMembers, draggedItem: $draggingItem) { from, to in
-                                    viewModel.moveTeamMember(from: from, to: to)
-                                })
+                                .background(Color(NSColor.windowBackgroundColor))
+                                .if(isDragModeEnabled) { view in
+                                    view.onDrag {
+                                        self.draggingItem = teamMember
+                                        return NSItemProvider(object: teamMember.objectID.uriRepresentation() as NSURL)
+                                    }
+                                    .onDrop(of: [.url], delegate: SimpleDragDelegate(item: teamMember, items: viewModel.teamMembers, draggedItem: $draggingItem) { from, to in
+                                        viewModel.moveTeamMember(from: from, to: to)
+                                    })
+                                }
                             }
                         }
                     }
@@ -149,7 +163,7 @@ struct TeamListView: View {
                     .padding(.vertical, 4)
                 }
                 .frame(height: 50)
-                .background(Color.clear) // Changed to clear background
+                .background(Color.clear)
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
