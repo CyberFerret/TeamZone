@@ -182,15 +182,14 @@ struct TeamListView: View {
             .environment(\.colorScheme, colorScheme)
             .id(member.id) // Force view recreation when editing different members
         }
-        .alert(item: $deletingMember) { member in
-            Alert(
-                title: Text("Delete Team Member"),
-                message: Text("Are you sure you want to delete \(member.name ?? "")?"),
-                primaryButton: .destructive(Text("Delete")) {
+        .sheet(item: $deletingMember) { member in
+            DeleteConfirmationView(
+                memberName: member.name ?? "",
+                onDelete: {
                     viewModel.deleteTeamMember(member)
                     deletingMember = nil
                 },
-                secondaryButton: .cancel {
+                onCancel: {
                     deletingMember = nil
                 }
             )
