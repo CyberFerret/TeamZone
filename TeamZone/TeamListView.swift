@@ -66,7 +66,7 @@ struct TeamListView: View {
                 Button(action: {
                     isShowingAddMemberView = true
                 }) {
-                    Label("Add Team Member", systemImage: "plus")
+                    Label("Add", systemImage: "plus")
                 }
 
                 Spacer()
@@ -87,7 +87,7 @@ struct TeamListView: View {
                 }
             }
             .padding(.horizontal)
-            .padding(.vertical, 4)
+            .padding(.vertical, 8)
         }
         .frame(maxHeight: maxHeight)
         .sheet(isPresented: $isShowingAddMemberView) {

@@ -26,7 +26,7 @@ struct SwipeableTeamMemberRow: View {
                             showingActions = false
                         }
                     }) {
-                        Image(systemName: "pencil")
+                        Image(systemName: "square.and.pencil")
                             .foregroundColor(.white)
                             .frame(width: 60, height: geometry.size.height)
                             .background(Color.blue)
