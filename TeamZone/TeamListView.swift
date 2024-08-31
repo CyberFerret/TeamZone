@@ -78,7 +78,7 @@ struct TeamListView: View {
                     .padding(.top, 8)
                 }
                 .padding(.horizontal, 8)
-                .frame(height: max(geometry.size.height - 50, 200)) // Ensure minimum content height
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
 
                 // Bottom toolbar
                 VStack {
@@ -120,7 +120,7 @@ struct TeamListView: View {
                 .background(Color(NSColor.windowBackgroundColor)) // Add background to toolbar
             }
         }
-        .frame(maxHeight: maxHeight)
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
         .sheet(isPresented: $isShowingAddMemberView) {
             AddEditMemberView(mode: .add, onSave: { newMember in
                 viewModel.addTeamMember(newMember)
