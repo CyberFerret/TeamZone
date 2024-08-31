@@ -101,15 +101,79 @@ struct AddEditMemberView: View {
     }
 
     var body: some View {
-        VStack(spacing: 10) {
-            Text(mode == .add ? "Add Team Member" : "Edit Team Member")
-                .font(.headline)
-                .padding(.vertical, 16)
+        ScrollView {
+            VStack(spacing: 10) {
+                Text(mode == .add ? "Add Team Member" : "Edit Team Member")
+                    .font(.headline)
+                    .padding(.vertical, 16)
 
-            Form {
-                TextField("Name", text: $name)
+                Form {
+                    TextField("Name", text: $name)
 
-                VStack(alignment: .leading) {
+                    VStack(alignment: .leading) {
+                        TextField("Location", text: $location, onEditingChanged: { isEditing in
+                            isEditingLocation = isEditing
+                            if isEditing {
+                                updateFilteredCities()
+                            } else {
+                                DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                                    isShowingSuggestions = false
+                                }
+                            }
+                        })
+                        .onChange(of: location) { _ in
+                            if isEditingLocation {
+                                updateFilteredCities()
+                            }
+                        }
+
+                        if isShowingSuggestions && !filteredCities.isEmpty {
+                            ScrollView {
+                                VStack(alignment: .leading, spacing: 5) {
+                                    ForEach(filteredCities, id: \.city) { city in
+                                        Text("\(city.city), \(city.country)")
+                                            .padding(.vertical, 5)
+                                            .padding(.horizontal, 10)
+                                            .background(Color.gray.opacity(0.2))
+                                            .cornerRadius(5)
+                                            .onTapGesture {
+                                                location = city.city
+                                                timeZone = city.timezone
+                                                isShowingSuggestions = false
+                                            }
+                                    }
+                                }
+                            }
+                            .frame(maxHeight: 150)
+                        }
+                    }
+
+                    Picker("Time Zone", selection: $timeZone) {
+                        ForEach(TimeZone.knownTimeZoneIdentifiers, id: \.self) { zone in
+                            Text(zone).tag(zone)
+                        }
+                    }
+
+                    Section(header: Text("Avatar")) {
+                        if let avatar = avatarImage {
+                            Image(nsImage: avatar)
+                                .resizable()
+                                .scaledToFit()
+                                .frame(width: 100, height: 100)
+                                .clipShape(Circle())
+                        }
+
+                        Button(action: selectAvatar) {
+                            Text(avatarImage == nil ? "Add Avatar" : "Change Avatar")
+                        }
+
+                        if avatarImage != nil {
+                            Button("Remove Avatar") {
+                                avatarImage = nil
+                            }
+                        }
+                    }
+
                     TextField("Location", text: $location, onEditingChanged: { isEditing in
                         isEditingLocation = isEditing
                         if isEditing {
@@ -146,124 +210,62 @@ struct AddEditMemberView: View {
                         .frame(maxHeight: 150)
                     }
                 }
+                .padding([.horizontal, .bottom])
 
-                Picker("Time Zone", selection: $timeZone) {
-                    ForEach(TimeZone.knownTimeZoneIdentifiers, id: \.self) { zone in
-                        Text(zone).tag(zone)
-                    }
-                }
-
-                Section(header: Text("Avatar")) {
-                    if let avatar = avatarImage {
-                        Image(nsImage: avatar)
-                            .resizable()
-                            .scaledToFit()
-                            .frame(width: 100, height: 100)
-                            .clipShape(Circle())
-                    }
-
-                    Button(action: selectAvatar) {
-                        Text(avatarImage == nil ? "Add Avatar" : "Change Avatar")
-                    }
-
-                    if avatarImage != nil {
-                        Button("Remove Avatar") {
-                            avatarImage = nil
+                HStack {
+                    Button(action: {
+                        let member: TeamMemberEntity
+                        if case .edit(let existingMember) = mode {
+                            member = existingMember
+                        } else {
+                            member = TeamMemberEntity(context: viewContext)
+                            member.id = UUID()
                         }
-                    }
-                }
 
-                TextField("Location", text: $location, onEditingChanged: { isEditing in
-                    isEditingLocation = isEditing
-                    if isEditing {
-                        updateFilteredCities()
-                    } else {
-                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                            isShowingSuggestions = false
-                        }
-                    }
-                })
-                .onChange(of: location) { _ in
-                    if isEditingLocation {
-                        updateFilteredCities()
-                    }
-                }
+                        member.name = name
+                        member.location = location
+                        member.timeZone = timeZone
 
-                if isShowingSuggestions && !filteredCities.isEmpty {
-                    ScrollView {
-                        VStack(alignment: .leading, spacing: 5) {
-                            ForEach(filteredCities, id: \.city) { city in
-                                Text("\(city.city), \(city.country)")
-                                    .padding(.vertical, 5)
-                                    .padding(.horizontal, 10)
-                                    .background(Color.gray.opacity(0.2))
-                                    .cornerRadius(5)
-                                    .onTapGesture {
-                                        location = city.city
-                                        timeZone = city.timezone
-                                        isShowingSuggestions = false
-                                    }
-                            }
+                        if let avatar = avatarImage {
+                            let resizedAvatar = avatar.resized(to: NSSize(width: 100, height: 100))
+                            member.avatarData = resizedAvatar.tiffRepresentation
+                        } else {
+                            member.avatarData = nil
                         }
+
+                        onSave(member)
+                        presentationMode.wrappedValue.dismiss()
+                    }) {
+                        Text("Save")
+                            .frame(minWidth: 60)
+                            .padding(.vertical, 2)
+                            .padding(.horizontal, 16)
+                            .background(Color.blue)
+                            .foregroundColor(.white)
+                            .cornerRadius(4)
                     }
-                    .frame(maxHeight: 150)
+                    .buttonStyle(.borderless)
+
+                    Spacer()
+
+                    Button(action: {
+                        presentationMode.wrappedValue.dismiss()
+                    }) {
+                        Text("Cancel")
+                            .frame(minWidth: 60)
+                            .padding(.vertical, 2)
+                            .padding(.horizontal, 16)
+                            .background(Color.red)
+                            .foregroundColor(.white)
+                            .cornerRadius(4)
+                    }
+                    .buttonStyle(.borderless)
                 }
+                .padding(.horizontal)
             }
-            .padding([.horizontal, .bottom])
-
-            HStack {
-                Button(action: {
-                    let member: TeamMemberEntity
-                    if case .edit(let existingMember) = mode {
-                        member = existingMember
-                    } else {
-                        member = TeamMemberEntity(context: viewContext)
-                        member.id = UUID()
-                    }
-
-                    member.name = name
-                    member.location = location
-                    member.timeZone = timeZone
-
-                    if let avatar = avatarImage {
-                        let resizedAvatar = avatar.resized(to: NSSize(width: 100, height: 100))
-                        member.avatarData = resizedAvatar.tiffRepresentation
-                    } else {
-                        member.avatarData = nil
-                    }
-
-                    onSave(member)
-                    presentationMode.wrappedValue.dismiss()
-                }) {
-                    Text("Save")
-                        .frame(minWidth: 60)
-                        .padding(.vertical, 2)
-                        .padding(.horizontal, 16)
-                        .background(Color.blue)
-                        .foregroundColor(.white)
-                        .cornerRadius(4)
-                }
-                .buttonStyle(.borderless)
-
-                Spacer()
-
-                Button(action: {
-                    presentationMode.wrappedValue.dismiss()
-                }) {
-                    Text("Cancel")
-                        .frame(minWidth: 60)
-                        .padding(.vertical, 2)
-                        .padding(.horizontal, 16)
-                        .background(Color.red)
-                        .foregroundColor(.white)
-                        .cornerRadius(4)
-                }
-                .buttonStyle(.borderless)
-            }
-            .padding(.horizontal)
         }
         .padding(.vertical, 10)
-        .frame(width: 300, height: 280)
+        .frame(width: 300, height: 450)
         .background(Color(NSColor.windowBackgroundColor))
         .environment(\.colorScheme, colorScheme)
     }
