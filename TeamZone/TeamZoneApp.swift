@@ -182,7 +182,9 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
 
         if let button = statusItem?.button {
-            button.image = NSImage(systemSymbolName: "clock", accessibilityDescription: "Team Zone")
+            let config = NSImage.SymbolConfiguration(pointSize: 18, weight: .regular)
+            button.image = NSImage(systemSymbolName: "person.3", accessibilityDescription: "Team Zone")?
+                .withSymbolConfiguration(config)
             button.action = #selector(togglePopover)
         }
 
