@@ -44,6 +44,13 @@ struct TeamListView: View {
     var body: some View {
         GeometryReader { geometry in
             VStack(spacing: 0) {
+                // Fixed top padding with shadow
+                VStack(spacing: 0) {
+                    Color.clear.frame(height: 8)
+                    Divider()
+                        .shadow(color: Color.black.opacity(0.1), radius: 1, x: 0, y: 1)
+                }
+
                 // Scrollable list of team members
                 ScrollView {
                     VStack(spacing: 0) {
@@ -75,10 +82,12 @@ struct TeamListView: View {
                             }
                         }
                     }
-                    .padding(.top, 8)
                 }
                 .padding(.horizontal, 8)
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
+
+                // Add divider before bottom toolbar
+                Divider()
 
                 // Bottom toolbar
                 VStack {
@@ -96,6 +105,7 @@ struct TeamListView: View {
                         }) {
                             Image(systemName: isDragModeEnabled ? "arrow.up.arrow.down.circle.fill" : "arrow.up.arrow.down.circle")
                         }
+                        .buttonStyle(PlainButtonStyle())
                         .help(isDragModeEnabled ? "Exit Rearrange Mode" : "Enter Rearrange Mode")
 
                         HStack {
@@ -117,7 +127,7 @@ struct TeamListView: View {
                     .padding(.vertical, 4)
                 }
                 .frame(height: 50)
-                .background(Color(NSColor.windowBackgroundColor)) // Add background to toolbar
+                .background(Color.clear) // Changed to clear background
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
