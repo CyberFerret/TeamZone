@@ -38,6 +38,8 @@ struct TeamListView: View {
     @Environment(\.colorScheme) var colorScheme
     @State private var isDragModeEnabled = false
     @State private var draggingItem: TeamMemberEntity?
+    @State private var isShowingSettingsMenu = false
+    @State private var isShowingAboutWindow = false
 
     let maxHeight: CGFloat
 
@@ -91,15 +93,14 @@ struct TeamListView: View {
 
                 // Bottom toolbar
                 VStack {
-                    HStack {
+                    HStack(spacing: 0) {
                         Button(action: {
                             isShowingAddMemberView = true
                         }) {
-                            Image(systemName: "plus")
+                            Label("Add", systemImage: "plus")
                         }
-                        .help("Add Team Member")
 
-                        Spacer(minLength: 30) // Minimum space of 30 points
+                        Spacer()
 
                         Button(action: {
                             isDragModeEnabled.toggle()
@@ -109,7 +110,7 @@ struct TeamListView: View {
                         .buttonStyle(PlainButtonStyle())
                         .help(isDragModeEnabled ? "Exit Rearrange Mode" : "Enter Rearrange Mode")
 
-                        Spacer(minLength: 20) // Minimum space of 20 points
+                        Spacer()
 
                         HStack {
                             Text("12hr")
@@ -120,10 +121,25 @@ struct TeamListView: View {
                         }
                         .font(.footnote)
 
-                        Spacer(minLength: 30) // Minimum space of 30 points
+                        Spacer()
 
-                        Button("Quit") {
-                            NSApplication.shared.terminate(nil)
+                        Button(action: {
+                            isShowingSettingsMenu = true
+                        }) {
+                            Image(systemName: "gear")
+                        }
+                        .popover(isPresented: $isShowingSettingsMenu, arrowEdge: .bottom) {
+                            VStack {
+                                Button("About Team Zone") {
+                                    isShowingSettingsMenu = false
+                                    isShowingAboutWindow = true
+                                }
+                                Divider()
+                                Button("Quit") {
+                                    NSApplication.shared.terminate(nil)
+                                }
+                            }
+                            .padding()
                         }
                     }
                     .padding(.horizontal)
@@ -161,6 +177,9 @@ struct TeamListView: View {
                     deletingMember = nil
                 }
             )
+        }
+        .sheet(isPresented: $isShowingAboutWindow) {
+            AboutView(isPresented: $isShowingAboutWindow)
         }
     }
 
@@ -217,5 +236,51 @@ extension View {
         } else {
             self
         }
+    }
+}
+
+struct AboutView: View {
+    @Binding var isPresented: Bool
+
+    var body: some View {
+        VStack(spacing: 20) {
+            HStack {
+                Spacer()
+                Button(action: {
+                    isPresented = false
+                }) {
+                    Image(systemName: "xmark.circle.fill")
+                        .foregroundColor(.gray)
+                }
+                .buttonStyle(PlainButtonStyle())
+                .padding(.trailing, 10)
+                .padding(.top, 10)
+            }
+
+            Image(systemName: "person.3")
+                .font(.system(size: 50))
+                .foregroundColor(.blue)
+
+            Text("Team Zone")
+                .font(.title)
+                .fontWeight(.bold)
+
+            Text("Team Zone is an app that helps you manage your team across different time zones. It allows you to add team members, set their locations, and easily view the current time for each team member.")
+                .multilineTextAlignment(.center)
+                .padding(.horizontal)
+
+            Text("Version 1.0")
+                .font(.caption)
+
+            VStack(spacing: 5) {
+                Text("Written By: Devan Sabaratnam")
+                Text("devan.sabaratnam@gmail.com")
+                Text("Twitter: @dsabar")
+            }
+            .font(.caption)
+            .foregroundColor(.gray)
+        }
+        .frame(width: 350, height: 400) // Increased width and height
+        .padding()
     }
 }
