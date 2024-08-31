@@ -183,41 +183,6 @@ struct AddEditMemberView: View {
                         }
                     }
 
-                    TextField("Location", text: $location, onEditingChanged: { isEditing in
-                        isEditingLocation = isEditing
-                        if isEditing {
-                            updateFilteredCities()
-                        } else {
-                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                                isShowingSuggestions = false
-                            }
-                        }
-                    })
-                    .onChange(of: location) { _ in
-                        if isEditingLocation {
-                            updateFilteredCities()
-                        }
-                    }
-
-                    if isShowingSuggestions && !filteredCities.isEmpty {
-                        ScrollView {
-                            VStack(alignment: .leading, spacing: 5) {
-                                ForEach(filteredCities, id: \.city) { city in
-                                    Text("\(city.city), \(city.country)")
-                                        .padding(.vertical, 5)
-                                        .padding(.horizontal, 10)
-                                        .background(Color.gray.opacity(0.2))
-                                        .cornerRadius(5)
-                                        .onTapGesture {
-                                            location = city.city
-                                            timeZone = city.timezone
-                                            isShowingSuggestions = false
-                                        }
-                                }
-                            }
-                        }
-                        .frame(maxHeight: 150)
-                    }
                 }
                 .padding([.horizontal, .bottom])
 

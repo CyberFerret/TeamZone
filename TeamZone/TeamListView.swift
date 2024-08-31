@@ -97,8 +97,11 @@ struct TeamListView: View {
                         Button(action: {
                             isShowingAddMemberView = true
                         }) {
-                            Label("Add", systemImage: "plus")
+                            Image(systemName: "plus")
+                                .font(.system(size: 16, weight: .bold))
                         }
+                        .buttonStyle(PlainButtonStyle())
+                        .help("Add Team Member")
 
                         Spacer()
 
