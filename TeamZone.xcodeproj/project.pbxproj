@@ -25,7 +25,6 @@
 		072CA9162C7F08D400987A05 /* TeamMemberRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 072CA9112C7F08D400987A05 /* TeamMemberRow.swift */; };
 		072CA9172C7F08D400987A05 /* TeamViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 072CA9122C7F08D400987A05 /* TeamViewModel.swift */; };
 		072CA9182C7F08D400987A05 /* TeamMember.swift in Sources */ = {isa = PBXBuildFile; fileRef = 072CA9132C7F08D400987A05 /* TeamMember.swift */; };
-		072CA91A2C7FFE4200987A05 /* CityTimeZoneData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 072CA9192C7FFE4200987A05 /* CityTimeZoneData.swift */; };
 		072CA91C2C8006B800987A05 /* UserSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 072CA91B2C8006B800987A05 /* UserSettings.swift */; };
 		072CA9202C805B0400987A05 /* DatabaseManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 072CA91F2C805B0400987A05 /* DatabaseManager.swift */; };
 		072CA9232C805BB300987A05 /* SQLite in Frameworks */ = {isa = PBXBuildFile; productRef = 072CA9222C805BB300987A05 /* SQLite */; };
@@ -73,7 +72,6 @@
 		072CA9112C7F08D400987A05 /* TeamMemberRow.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TeamMemberRow.swift; sourceTree = "<group>"; };
 		072CA9122C7F08D400987A05 /* TeamViewModel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TeamViewModel.swift; sourceTree = "<group>"; };
 		072CA9132C7F08D400987A05 /* TeamMember.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TeamMember.swift; sourceTree = "<group>"; };
-		072CA9192C7FFE4200987A05 /* CityTimeZoneData.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CityTimeZoneData.swift; sourceTree = "<group>"; };
 		072CA91B2C8006B800987A05 /* UserSettings.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UserSettings.swift; sourceTree = "<group>"; };
 		072CA91F2C805B0400987A05 /* DatabaseManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DatabaseManager.swift; sourceTree = "<group>"; };
 		072CA9242C80621800987A05 /* CityTimeZoneData.db */ = {isa = PBXFileReference; lastKnownFileType = file; path = CityTimeZoneData.db; sourceTree = "<group>"; };
@@ -130,7 +128,6 @@
 		072CA8DE2C7F051000987A05 /* TeamZone */ = {
 			isa = PBXGroup;
 			children = (
-				072CA9192C7FFE4200987A05 /* CityTimeZoneData.swift */,
 				072CA9102C7F08D400987A05 /* AddEditMemberView.swift */,
 				070776CF2C814FC1000052DD /* SharedModels.swift */,
 				072CA9282C806C6100987A05 /* TeamMemberEntity+CoreDataHelpers.swift */,
@@ -329,7 +326,6 @@
 				072CA8E92C7F051100987A05 /* Persistence.swift in Sources */,
 				072CA9142C7F08D400987A05 /* TeamListView.swift in Sources */,
 				072CA8E22C7F051000987A05 /* ContentView.swift in Sources */,
-				072CA91A2C7FFE4200987A05 /* CityTimeZoneData.swift in Sources */,
 				072CA9202C805B0400987A05 /* DatabaseManager.swift in Sources */,
 				072CA9152C7F08D400987A05 /* AddEditMemberView.swift in Sources */,
 				072CA8E02C7F051000987A05 /* TeamZoneApp.swift in Sources */,

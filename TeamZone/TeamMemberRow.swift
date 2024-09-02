@@ -11,7 +11,6 @@ struct TeamMemberRow: View {
     let member: TeamMemberEntity
     @State private var currentTime = Date()
     @State private var isEditing = false
-    @State private var showingDeleteConfirmation = false
     @State private var isHovering = false
     @EnvironmentObject var viewModel: TeamViewModel
     @EnvironmentObject var userSettings: UserSettings
@@ -74,16 +73,6 @@ struct TeamMemberRow: View {
             AddEditMemberView(mode: .edit(member)) { updatedMember in
                 viewModel.updateTeamMember(updatedMember)
             }
-        }
-        .alert(isPresented: $showingDeleteConfirmation) {
-            Alert(
-                title: Text("Delete Team Member"),
-                message: Text("Are you sure you want to delete \(member.name ?? "this team member")?"),
-                primaryButton: .destructive(Text("Delete")) {
-                    viewModel.deleteTeamMember(member)
-                },
-                secondaryButton: .cancel()
-            )
         }
     }
 
