@@ -12,7 +12,7 @@ Adding a new team member can be done by clicking on the '+' icon on the bottom t
 
 Editing or deleting a team member can be done by left swiping on the row and choosing the option.
 
-<img width="456" alt="TeamZone Edit Team Member" src="https://github.com/user-attachments/assets/caef3bc0-139c-477f-a8df-cccc3dac049a">
+<img width="446" alt="TeamZone Edit Row" src="https://github.com/user-attachments/assets/8797bc93-c68c-429a-a0e1-87ca3d175466">
 
 You can resize the window to fit the number of team members you have (long lists will scroll).
 
