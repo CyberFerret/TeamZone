@@ -4,6 +4,20 @@ TeamZone is an app designed to help you keep track of your remote team timezones
 
 You can set up as many different team members (or offices) in multiple locations, rearrange them on the list, and see their local time (and what day it is for them) in 12 or 24 hour format.
 
+<img width="446" alt="TeamZone Main Screen" src="https://github.com/user-attachments/assets/447e862b-68ff-4547-8972-ce984b04e8d1">
+
+Adding a new team member can be done by clicking on the '+' icon on the bottom toolbar and entering in their details (city and timezone).
+
+<img width="456" alt="TeamZone Edit Team Member" src="https://github.com/user-attachments/assets/ea73a443-e00b-47ea-a12c-6045abe1d948">
+
+Editing or deleting a team member can be done by left swiping on the row and choosing the option.
+
+<img width="456" alt="TeamZone Edit Team Member" src="https://github.com/user-attachments/assets/caef3bc0-139c-477f-a8df-cccc3dac049a">
+
+You can resize the window to fit the number of team members you have (long lists will scroll).
+
+TeamZone runs as a service agent in the background.  To quit the app completely, you can click on the 'gear' icon in the bottom right, and choose 'Quit'.
+
 ### About
 
 TeamZone is a Swift app designed to run as a menu bar agent on macOS.  (Sorry, this app is Mac only at this stage).
